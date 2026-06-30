@@ -1,0 +1,17 @@
+# Diagnostic / log files
+gcm-diagnose.log
+*.log
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store

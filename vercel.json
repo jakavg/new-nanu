@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/Nanu.dc.html" },
+    { "source": "/daftar-nama", "destination": "/Daftar-Nama.dc.html" },
+    { "source": "/nama-tersimpan", "destination": "/Nama-Tersimpan.dc.html" }
+  ]
+}
