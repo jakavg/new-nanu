@@ -195,7 +195,11 @@ class Component extends DCLogic {
   }
 
   doLogin() {
-    if (this._sb) this._sb.signInWithGoogle(window.location.href);
+    if (!this._sb) return;
+    const u = new URL(window.location.href);
+    ['error', 'error_description', 'order_id', 'status_code', 'transaction_status', 'sb'].forEach((k) => u.searchParams.delete(k));
+    u.hash = '';
+    this._sb.signInWithGoogle(u.origin + u.pathname + u.search);
   }
 
   showToast(msg) {
