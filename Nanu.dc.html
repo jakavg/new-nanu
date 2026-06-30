@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async=""></script>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:#F9EFEB;color:#0B2A3A}
+  button{font-family:inherit}
+  input{font-family:inherit}
+  ::placeholder{color:#A9B3B8}
+  @keyframes nanuSpin{to{transform:rotate(360deg)}}
+  @keyframes nanuPop{from{transform:translateY(16px) scale(.98)}to{transform:none}}
+  @keyframes nanuToast{from{transform:translate(-50%,16px)}to{transform:translate(-50%,0)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#F9EFEB">
+
+  <!-- ============ HEADER ============ -->
+  <header style="position:sticky;top:0;z-index:40;background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC">
+    <div style="max-width:880px;width:100%;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <a href="Nanu.dc.html" title="Beranda" style="display:flex;align-items:center;text-decoration:none">
+        <img src="assets/nanu-logo.png" alt="Nanu" style="height:42px;width:auto;display:block">
+      </a>
+      <nav style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button onClick="{{ goSaved }}" style="background:none;border:none;cursor:pointer;font-weight:600;font-size:14px;color:#0B2A3A;padding:8px 12px;border-radius:10px;display:flex;align-items:center;gap:7px">
+          Tersimpan
+          <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ true }}"><span style="background:#EE5B3A;color:#fff;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px">{{ savedCount }}</span></sc-if>
+        </button>
+        <sc-if value="{{ noUser }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ openLogin }}" style="background:#0B2A3A;border:none;cursor:pointer;font-weight:600;font-size:14px;color:#fff;padding:9px 18px;border-radius:999px">Masuk</button>
+        </sc-if>
+        <sc-if value="{{ hasUser }}">
+          <div onMouseEnter="{{ openMenu }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
+            <button onClick="{{ toggleMenu }}" title="{{ userName }}" style="background:none;border:none;cursor:pointer;padding:0;display:flex;border-radius:50%">
+              <sc-if value="{{ hasAvatar }}" hint-placeholder-val="{{ false }}"><div style="{{ avatarStyle }}"></div></sc-if>
+              <sc-if value="{{ noAvatar }}" hint-placeholder-val="{{ true }}"><div style="width:34px;height:34px;border-radius:50%;background:#3CA274;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Baloo 2',cursive;font-size:16px">{{ userInitial }}</div></sc-if>
+            </button>
+            <sc-if value="{{ menuOpen }}">
+              <div style="position:absolute;top:34px;right:0;padding-top:10px;z-index:55">
+                <div style="background:#fff;border:1px solid #EDE2DC;border-radius:16px;box-shadow:0 18px 44px -16px rgba(11,42,58,.4);padding:15px;min-width:230px">
+                  <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
+                    <sc-if value="{{ hasAvatar }}" hint-placeholder-val="{{ false }}"><div style="{{ avatarStyle }}"></div></sc-if>
+                    <sc-if value="{{ noAvatar }}" hint-placeholder-val="{{ true }}"><div style="width:38px;height:38px;border-radius:50%;background:#3CA274;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Baloo 2',cursive;font-size:17px;flex:0 0 auto">{{ userInitial }}</div></sc-if>
+                    <div style="min-width:0">
+                      <div style="font-weight:700;font-size:14px;color:#0B2A3A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ userName }}</div>
+                      <div style="font-size:12.5px;color:#8A969C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ userEmail }}</div>
+                    </div>
+                  </div>
+                  <button onClick="{{ logout }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#F9EFEB;border:1px solid #EDE2DC;border-radius:10px;padding:10px;font-weight:700;font-size:13.5px;color:#EE5B3A;cursor:pointer" style-hover="background:#FDEAE4;border-color:#EE5B3A">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+                    Keluar
+                  </button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </nav>
+    </div>
+  </header>
+
+  <main style="flex:1;width:100%">
+    <div style="max-width:720px;width:100%;margin:0 auto;padding:48px 20px 80px">
+
+      <h1 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(30px,6vw,46px);line-height:1.08;text-align:center;margin:0 0 14px;letter-spacing:-.01em">
+        Cari nama <span style="color:#3CA274">bermakna</span><br>untuk <span style="color:#EE5B3A">si kecil</span>
+      </h1>
+
+      <div style="background:#fff;border:1px solid #EDE2DC;border-radius:26px;padding:clamp(20px,4vw,30px);box-shadow:0 18px 50px -28px rgba(11,42,58,.3)">
+
+        <!-- keyword -->
+        <label style="display:block;font-weight:700;font-size:14px;margin-bottom:9px;color:#0B2A3A">Kata kunci arti / makna <span style="color:#8A969C;font-weight:500">· opsional</span></label>
+        <div style="position:relative;margin-bottom:26px">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#A9B3B8;display:flex">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+          </span>
+          <input value="{{ keyword }}" onChange="{{ onKeyword }}" onKeyDown="{{ onKeywordKey }}" placeholder="mis. cahaya, keberanian, kebijaksanaan" style="width:100%;padding:15px 16px 15px 46px;border:2px solid #EDE2DC;border-radius:15px;font-size:16px;color:#0B2A3A;outline:none;background:#FCF7F4" style-focus="border-color:#3CA274;background:#fff">
+        </div>
+
+        <!-- origin -->
+        <label style="display:block;font-weight:700;font-size:14px;margin-bottom:9px;color:#0B2A3A">Asal nama</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:26px">
+          <sc-for list="{{ originOptions }}" as="opt" hint-placeholder-count="3">
+            <button onClick="{{ opt.onClick }}" style="{{ opt.cardStyle }}">
+              <span style="{{ opt.dotStyle }}"></span>
+              <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                <span style="font-weight:700;font-size:15px;color:#0B2A3A">{{ opt.label }}</span>
+                <span style="font-size:12px;color:#8A969C">{{ opt.desc }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+
+        <!-- length + gender -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-bottom:30px">
+          <div>
+            <label style="display:block;font-weight:700;font-size:14px;margin-bottom:9px;color:#0B2A3A">Panjang nama</label>
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+              <sc-for list="{{ lengthOptions }}" as="opt" hint-placeholder-count="2">
+                <button onClick="{{ opt.onClick }}" style="{{ opt.style }}">{{ opt.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-weight:700;font-size:14px;margin-bottom:9px;color:#0B2A3A">Jenis kelamin</label>
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+              <sc-for list="{{ genderOptions }}" as="opt" hint-placeholder-count="2">
+                <button onClick="{{ opt.onClick }}" style="{{ opt.style }}">{{ opt.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <button onClick="{{ doSearch }}" style="{{ ctaStyle }}" style-hover="filter:brightness(1.05);transform:translateY(-1px)">
+          <sc-if value="{{ searching }}">
+            <span style="width:20px;height:20px;border:2.5px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:nanuSpin .8s linear infinite"></span>
+            Mencari nama…
+          </sc-if>
+          <sc-if value="{{ notSearching }}" hint-placeholder-val="{{ true }}">
+            Carikan Nama
+          </sc-if>
+        </button>
+      </div>
+
+      <sc-if value="{{ showExamples }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:26px;text-align:center">
+          <p style="font-size:13px;color:#8A969C;margin:0 0 12px;font-weight:600">Coba kata kunci populer</p>
+          <div style="display:flex;flex-wrap:wrap;gap:9px;justify-content:center">
+            <sc-for list="{{ exampleChips }}" as="chip" hint-placeholder-count="6">
+              <button onClick="{{ chip.onClick }}" style="background:#fff;border:1px solid #EDE2DC;color:#0B2A3A;font-weight:600;font-size:13px;padding:8px 15px;border-radius:999px;cursor:pointer" style-hover="border-color:#185FA4;color:#185FA4">{{ chip.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+
+  <!-- ============ LOGIN MODAL ============ -->
+  <sc-if value="{{ showLogin }}">
+    <div onClick="{{ closeLogin }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:26px;max-width:380px;width:100%;padding:34px 30px;text-align:center;animation:nanuPop .28s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)">
+        <img src="assets/nanu-logo.png" alt="Nanu" style="height:30px;margin:0 auto 22px;display:block">
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Masuk ke Nanu</h3>
+        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 26px">Simpan &amp; kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.</p>
+        <sc-if value="{{ googleReady }}">
+          <div ref="{{ googleMount }}" style="display:flex;justify-content:center;margin-bottom:12px;min-height:44px"></div>
+          <button onClick="{{ loginDemo }}" style="background:none;border:none;color:#A9B3B8;font-weight:600;font-size:12.5px;cursor:pointer">Masuk mode demo untuk uji coba</button>
+        </sc-if>
+        <sc-if value="{{ notGoogleReady }}">
+          <button onClick="{{ loginDemo }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
+            Lanjutkan dengan Google
+          </button>
+        </sc-if>
+        <button onClick="{{ closeLogin }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ TOAST ============ -->
+  <sc-if value="{{ hasToast }}">
+    <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:80;background:#0B2A3A;color:#fff;font-weight:600;font-size:14px;padding:13px 22px;border-radius:999px;box-shadow:0 14px 40px -12px rgba(11,42,58,.6);animation:nanuToast .3s ease both;white-space:nowrap">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:720},&quot;ctaColor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Red Truck&quot;,&quot;Green Grass&quot;,&quot;Blue Sky&quot;],&quot;default&quot;:&quot;Green Grass&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tampilan&quot;},&quot;showExamples&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tampilan&quot;}}">
+class Component extends DCLogic {
+  state = {
+    keyword: '', origin: 'jawa', length: '2', gender: 'lk',
+    saved: [], user: null, showLogin: false, pendingNav: null, toast: '', googleReady: false, menuOpen: false, searching: false,
+  };
+
+  componentDidMount() {
+    try {
+      const s = JSON.parse(localStorage.getItem('nanu_saved') || '[]');
+      const u = JSON.parse(localStorage.getItem('nanu_user') || 'null');
+      this.setState({ saved: Array.isArray(s) ? s : [], user: u });
+    } catch (e) {}
+    this.initGoogle();
+  }
+
+  initGoogle() {
+    import('./nanu-auth.js').then((m) => {
+      this._auth = m;
+      m.init((p) => this.onGoogleUser(p)).then((ok) => {
+        if (ok) { this.setState({ googleReady: true }); setTimeout(() => this.tryRenderGoogleBtn(), 0); }
+      });
+    }).catch(() => {});
+  }
+
+  tryRenderGoogleBtn() { if (this._auth && this._gEl) this._auth.renderButton(this._gEl, { width: 300 }); }
+
+  onGoogleUser(p) {
+    this.finishLogin({
+      name: p.name || 'Pengguna',
+      email: p.email || '',
+      initial: ((p.given_name || p.name || '?').trim()[0] || '?').toUpperCase(),
+      picture: p.picture || '',
+    });
+  }
+
+  persistUser(u) { try { localStorage.setItem('nanu_user', JSON.stringify(u)); } catch (e) {} }
+
+  showToast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+
+  setField(k, v) { this.setState({ [k]: v }); }
+  originLabel(id) { return { jawa: 'Jawa Kuno', sansekerta: 'Sansekerta', islami: 'Islami' }[id]; }
+  onKeywordKey(e) { if (e.key === 'Enter') this.doSearch(); }
+
+  doSearch() {
+    if (this.state.searching) return;
+    const { origin, length, gender } = this.state;
+    const kw = this.state.keyword.trim();
+    const params = { origin, length, gender, keyword: kw };
+    try { localStorage.setItem('nanu_query', JSON.stringify(params)); } catch (e) {}
+    const p = new URLSearchParams({ origin, length, gender });
+    if (kw) p.set('keyword', kw);
+    const url = 'Daftar-Nama.dc.html?' + p.toString();
+    // Tampilkan loading dulu, beri React waktu repaint, baru pindah halaman.
+    this.setState({ searching: true });
+    setTimeout(() => { window.location.href = url; }, 120);
+  }
+
+  goSaved() {
+    if (this.state.user) { window.location.href = 'Nama-Tersimpan.dc.html'; return; }
+    this.setState({ showLogin: true, pendingNav: 'saved' });
+    this.showToast('Masuk dulu untuk melihat koleksi');
+  }
+
+  openLogin() { this.setState({ showLogin: true, pendingNav: null }); }
+  closeLogin() { this.setState({ showLogin: false, pendingNav: null }); }
+  stop(e) { e.stopPropagation(); }
+
+  loginDemo() {
+    this.finishLogin({ name: 'Pengguna Nanu', email: 'kamu@gmail.com', initial: 'P', picture: '' });
+  }
+
+  finishLogin(user) {
+    const nav = this.state.pendingNav;
+    this.setState({ user, showLogin: false, pendingNav: null });
+    this.persistUser(user);
+    if (nav === 'saved') { window.location.href = 'Nama-Tersimpan.dc.html'; return; }
+    this.showToast('Berhasil masuk');
+  }
+
+  logout() { this.setState({ user: null }); this.persistUser(null); this.showToast('Kamu telah keluar'); }
+
+  renderVals() {
+    const st = this.state;
+    const ctaColors = { 'Red Truck': '#EE5B3A', 'Green Grass': '#3CA274', 'Blue Sky': '#185FA4' };
+    const ctaC = ctaColors[this.props.ctaColor] || '#3CA274';
+
+    const O = [
+      { id: 'jawa', label: 'Jawa Kuno', desc: 'Klasik & berwibawa', color: '#3CA274' },
+      { id: 'sansekerta', label: 'Sansekerta', desc: 'Agung & filosofis', color: '#185FA4' },
+      { id: 'islami', label: 'Islami', desc: 'Penuh berkah', color: '#F6BE2D' },
+    ];
+    const originOptions = O.map(o => {
+      const active = st.origin === o.id;
+      return {
+        label: o.label, desc: o.desc,
+        onClick: () => this.setField('origin', o.id),
+        cardStyle: 'display:flex;align-items:center;gap:11px;text-align:left;cursor:pointer;padding:13px 15px;border-radius:16px;background:#fff;border:2px solid ' + (active ? o.color : '#EDE2DC') + ';box-shadow:' + (active ? '0 8px 20px -10px ' + o.color : '0 1px 2px rgba(11,42,58,.04)') + ';transition:all .15s',
+        dotStyle: 'width:14px;height:14px;border-radius:50%;flex:0 0 auto;background:' + o.color,
+      };
+    });
+
+    const pill = (active, color) => 'padding:10px 18px;border-radius:999px;cursor:pointer;font-weight:600;font-size:15px;transition:all .15s;border:2px solid ' + (active ? color : '#EDE2DC') + ';background:' + (active ? color : '#fff') + ';color:' + (active ? '#fff' : '#0B2A3A');
+    const lengthOptions = [{ id: '2', label: '2 Kata' }, { id: '3', label: '3 Kata' }].map(o => ({
+      label: o.label, onClick: () => this.setField('length', o.id), style: pill(st.length === o.id, '#3CA274'),
+    }));
+    const genderOptions = [{ id: 'lk', label: 'Laki-laki' }, { id: 'pr', label: 'Perempuan' }].map(o => ({
+      label: o.label, onClick: () => this.setField('gender', o.id), style: pill(st.gender === o.id, '#185FA4'),
+    }));
+
+    const exampleChips = ['Cahaya', 'Keberanian', 'Kebijaksanaan', 'Cinta kasih', 'Bintang', 'Anugerah'].map(w => ({
+      label: w, onClick: () => this.setField('keyword', w),
+    }));
+
+    return {
+      keyword: st.keyword,
+      onKeyword: (e) => this.setField('keyword', e.target.value),
+      onKeywordKey: (e) => this.onKeywordKey(e),
+      originOptions, lengthOptions, genderOptions, exampleChips,
+      showExamples: this.props.showExamples !== false,
+      ctaStyle: 'width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:' + ctaC + ';border:none;color:#fff;font-family:\'Baloo 2\',cursive;font-weight:700;font-size:18px;padding:16px;border-radius:16px;cursor:pointer;box-shadow:0 12px 26px -12px ' + ctaC + ';transition:all .15s',
+      doSearch: () => this.doSearch(),
+      searching: st.searching,
+      notSearching: !st.searching,
+
+      savedCount: st.saved.length,
+      hasSaved: st.saved.length > 0,
+      hasUser: !!st.user,
+      noUser: !st.user,
+      userInitial: st.user ? st.user.initial : '',
+      goSaved: () => this.goSaved(),
+      openLogin: () => this.openLogin(),
+      logout: () => this.logout(),
+
+      showLogin: st.showLogin,
+      closeLogin: () => this.closeLogin(),
+      loginDemo: () => this.loginDemo(),
+      googleReady: st.googleReady,
+      notGoogleReady: !st.googleReady,
+      googleMount: (el) => { this._gEl = el; if (el) this.tryRenderGoogleBtn(); },
+      hasAvatar: !!(st.user && st.user.picture),
+      noAvatar: !(st.user && st.user.picture),
+      userPicture: st.user ? st.user.picture : '',
+      userName: st.user ? st.user.name : '',
+      userEmail: st.user ? st.user.email : '',
+      menuOpen: st.menuOpen,
+      openMenu: () => this.setState({ menuOpen: true }),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
+      avatarStyle: (st.user && st.user.picture) ? 'width:34px;height:34px;border-radius:50%;background-size:cover;background-position:center;background-repeat:no-repeat;background-image:url("' + st.user.picture + '")' : 'width:34px;height:34px;border-radius:50%;background:#3CA274',
+      stop: (e) => this.stop(e),
+
+      hasToast: !!st.toast,
+      toast: st.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>

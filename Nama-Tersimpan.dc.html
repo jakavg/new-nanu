@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:#F9EFEB;color:#0B2A3A}
+  button{font-family:inherit}
+  ::placeholder{color:#A9B3B8}
+  @keyframes nanuPop{from{transform:translateY(16px) scale(.98)}to{transform:none}}
+  @keyframes nanuToast{from{transform:translate(-50%,16px)}to{transform:translate(-50%,0)}}
+  @keyframes nanuBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#F9EFEB">
+
+  <!-- ============ HEADER ============ -->
+  <header style="position:sticky;top:0;z-index:40;background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC">
+    <div style="max-width:880px;width:100%;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <a href="Nanu.dc.html" title="Beranda" style="display:flex;align-items:center;text-decoration:none">
+        <img src="assets/nanu-logo.png" alt="Nanu" style="height:42px;width:auto;display:block">
+      </a>
+      <nav style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <a href="Nanu.dc.html" style="font-weight:600;font-size:14px;color:#0B2A3A;padding:8px 12px;border-radius:10px;text-decoration:none">Cari nama</a>
+        <sc-if value="{{ noUser }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ openLogin }}" style="background:#0B2A3A;border:none;cursor:pointer;font-weight:600;font-size:14px;color:#fff;padding:9px 18px;border-radius:999px">Masuk</button>
+        </sc-if>
+        <sc-if value="{{ hasUser }}">
+          <div onMouseEnter="{{ openMenu }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
+            <button onClick="{{ toggleMenu }}" title="{{ userName }}" style="background:none;border:none;cursor:pointer;padding:0;display:flex;border-radius:50%">
+              <sc-if value="{{ hasAvatar }}" hint-placeholder-val="{{ false }}"><div style="{{ avatarStyle }}"></div></sc-if>
+              <sc-if value="{{ noAvatar }}" hint-placeholder-val="{{ true }}"><div style="width:34px;height:34px;border-radius:50%;background:#3CA274;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Baloo 2',cursive;font-size:16px">{{ userInitial }}</div></sc-if>
+            </button>
+            <sc-if value="{{ menuOpen }}">
+              <div style="position:absolute;top:34px;right:0;padding-top:10px;z-index:55">
+                <div style="background:#fff;border:1px solid #EDE2DC;border-radius:16px;box-shadow:0 18px 44px -16px rgba(11,42,58,.4);padding:15px;min-width:230px">
+                  <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
+                    <sc-if value="{{ hasAvatar }}" hint-placeholder-val="{{ false }}"><div style="{{ avatarStyle }}"></div></sc-if>
+                    <sc-if value="{{ noAvatar }}" hint-placeholder-val="{{ true }}"><div style="width:38px;height:38px;border-radius:50%;background:#3CA274;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Baloo 2',cursive;font-size:17px;flex:0 0 auto">{{ userInitial }}</div></sc-if>
+                    <div style="min-width:0">
+                      <div style="font-weight:700;font-size:14px;color:#0B2A3A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ userName }}</div>
+                      <div style="font-size:12.5px;color:#8A969C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ userEmail }}</div>
+                    </div>
+                  </div>
+                  <button onClick="{{ logout }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#F9EFEB;border:1px solid #EDE2DC;border-radius:10px;padding:10px;font-weight:700;font-size:13.5px;color:#EE5B3A;cursor:pointer" style-hover="background:#FDEAE4;border-color:#EE5B3A">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+                    Keluar
+                  </button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </nav>
+    </div>
+  </header>
+
+  <main style="flex:1;width:100%">
+    <div style="max-width:720px;width:100%;margin:0 auto;padding:36px 20px 90px">
+      <h2 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(26px,5vw,36px);margin:0 0 6px;letter-spacing:-.01em">Nama Tersimpan</h2>
+      <p style="color:#5C6B72;font-size:15px;margin:0 0 28px">Koleksi nama favoritmu, tersimpan di akun Google.</p>
+
+      <!-- locked (not logged in) -->
+      <sc-if value="{{ isLocked }}">
+        <div style="background:#fff;border:1px dashed #DCCFC8;border-radius:24px;padding:60px 24px;text-align:center">
+          <div style="width:70px;height:70px;border-radius:22px;background:#F9EFEB;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#185FA4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          </div>
+          <p style="font-family:'Baloo 2',cursive;font-weight:600;font-size:20px;margin:0 0 6px">Masuk untuk melihat koleksi</p>
+          <p style="color:#8A969C;font-size:14px;margin:0 0 22px">Nama yang kamu simpan akan muncul di sini setelah login.</p>
+          <button onClick="{{ openLogin }}" style="background:#0B2A3A;border:none;color:#fff;font-weight:700;font-size:15px;padding:12px 24px;border-radius:999px;cursor:pointer">Masuk dengan Google</button>
+        </div>
+      </sc-if>
+
+      <!-- empty -->
+      <sc-if value="{{ savedEmpty }}">
+        <div style="background:#fff;border:1px dashed #DCCFC8;border-radius:24px;padding:60px 24px;text-align:center">
+          <div style="width:70px;height:70px;border-radius:22px;background:#F9EFEB;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;animation:nanuBob 3s ease-in-out infinite">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#EE5B3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+          </div>
+          <p style="font-family:'Baloo 2',cursive;font-weight:600;font-size:20px;margin:0 0 6px">Belum ada nama tersimpan</p>
+          <p style="color:#8A969C;font-size:14px;margin:0 0 22px">Cari dan simpan nama yang kamu suka di sini.</p>
+          <a href="Nanu.dc.html" style="display:inline-block;background:#EE5B3A;color:#fff;font-weight:700;font-size:15px;padding:12px 24px;border-radius:999px;text-decoration:none">Mulai cari nama</a>
+        </div>
+      </sc-if>
+
+      <!-- list -->
+      <sc-if value="{{ savedHas }}">
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <sc-for list="{{ savedItems }}" as="r" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #EDE2DC;border-radius:20px;padding:18px;display:flex;align-items:flex-start;gap:15px;box-shadow:0 1px 2px rgba(11,42,58,.04)">
+              <div style="{{ r.badgeStyle }}">{{ r.initial }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(20px,3.4vw,24px);line-height:1.15;color:#0B2A3A;margin-bottom:4px">{{ r.name }}</div>
+                <div style="color:#5C6B72;font-size:14.5px;line-height:1.55">{{ r.meaning }}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;flex:0 0 auto">
+                <button onClick="{{ r.onShare }}" title="Bagikan" style="width:40px;height:40px;border-radius:12px;border:1px solid #EDE2DC;background:#FCF7F4;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:#185FA4">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B2A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"></path></svg>
+                </button>
+                <button onClick="{{ r.onRemove }}" title="Hapus" style="width:40px;height:40px;border-radius:12px;border:1px solid #EDE2DC;background:#FCF7F4;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="border-color:#EE5B3A;background:#FDEAE4">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EE5B3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg>
+                </button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+
+  <!-- ============ LOGIN MODAL ============ -->
+  <sc-if value="{{ showLogin }}">
+    <div onClick="{{ closeLogin }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:26px;max-width:380px;width:100%;padding:34px 30px;text-align:center;animation:nanuPop .28s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)">
+        <img src="assets/nanu-logo.png" alt="Nanu" style="height:30px;margin:0 auto 22px;display:block">
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Masuk ke Nanu</h3>
+        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 26px">Akses koleksi nama favoritmu dari perangkat mana pun.</p>
+        <sc-if value="{{ googleReady }}">
+          <div ref="{{ googleMount }}" style="display:flex;justify-content:center;margin-bottom:12px;min-height:44px"></div>
+          <button onClick="{{ loginDemo }}" style="background:none;border:none;color:#A9B3B8;font-weight:600;font-size:12.5px;cursor:pointer">Masuk mode demo untuk uji coba</button>
+        </sc-if>
+        <sc-if value="{{ notGoogleReady }}">
+          <button onClick="{{ loginDemo }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
+            Lanjutkan dengan Google
+          </button>
+        </sc-if>
+        <button onClick="{{ closeLogin }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ SHARE MODAL ============ -->
+  <sc-if value="{{ hasShare }}">
+    <div onClick="{{ closeShare }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;padding:0">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:26px 26px 0 0;max-width:480px;width:100%;padding:26px 24px 34px;animation:nanuPop .3s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 -20px 60px -20px rgba(11,42,58,.4)">
+        <div style="width:42px;height:5px;border-radius:999px;background:#EDE2DC;margin:0 auto 20px"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:21px;margin:0">Bagikan nama</h3>
+          <button onClick="{{ closeShare }}" style="background:#F9EFEB;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#5C6B72"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+        </div>
+        <p style="color:#5C6B72;font-size:14px;margin:0 0 22px"><strong style="color:#0B2A3A">{{ shareName }}</strong> — {{ shareMeaning }}</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <button onClick="{{ shareWhatsapp }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:9px;padding:6px 0" style-hover="transform:translateY(-2px)">
+            <span style="width:58px;height:58px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.2-1-.4-1.8-.7-3.1-1.3-5.1-4.4-5.3-4.6-.1-.2-1.2-1.6-1.2-3.1s.8-2.2 1-2.5c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .7.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.5l.7 1.2c.5.7 1 1.1 1.7 1.5.2.1.4.1.5-.1l.6-.8c.2-.2.3-.2.5-.1l1.9.9c.2.1.4.2.4.3.1.2.1.6 0 1z"></path></svg></span>
+            <span style="font-size:12px;font-weight:600;color:#5C6B72">WhatsApp</span>
+          </button>
+          <button onClick="{{ shareInstagram }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:9px;padding:6px 0" style-hover="transform:translateY(-2px)">
+            <span style="width:58px;height:58px;border-radius:50%;background:linear-gradient(45deg,#F6BE2D,#EE5B3A,#C13584,#833AB4);display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.2" fill="#fff" stroke="none"></circle></svg></span>
+            <span style="font-size:12px;font-weight:600;color:#5C6B72">Instagram</span>
+          </button>
+          <button onClick="{{ shareFacebook }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:9px;padding:6px 0" style-hover="transform:translateY(-2px)">
+            <span style="width:58px;height:58px;border-radius:50%;background:#1877F2;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M14 9h2.5V6H14c-2 0-3.5 1.5-3.5 3.5V11H8v3h2.5v7h3v-7H16l.5-3h-3V9.5c0-.3.2-.5.5-.5z"></path></svg></span>
+            <span style="font-size:12px;font-weight:600;color:#5C6B72">Facebook</span>
+          </button>
+          <button onClick="{{ shareCopy }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:9px;padding:6px 0" style-hover="transform:translateY(-2px)">
+            <span style="width:58px;height:58px;border-radius:50%;background:#0B2A3A;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"></path><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"></path></svg></span>
+            <span style="font-size:12px;font-weight:600;color:#5C6B72">Salin Tautan</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ TOAST ============ -->
+  <sc-if value="{{ hasToast }}">
+    <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:80;background:#0B2A3A;color:#fff;font-weight:600;font-size:14px;padding:13px 22px;border-radius:999px;box-shadow:0 14px 40px -12px rgba(11,42,58,.6);animation:nanuToast .3s ease both;white-space:nowrap">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:640}}">
+class Component extends DCLogic {
+  state = { saved: [], user: null, showLogin: false, shareTarget: null, toast: '', googleReady: false, menuOpen: false };
+
+  componentDidMount() {
+    let saved = [], user = null;
+    try {
+      const s = JSON.parse(localStorage.getItem('nanu_saved') || '[]');
+      user = JSON.parse(localStorage.getItem('nanu_user') || 'null');
+      saved = Array.isArray(s) ? s : [];
+    } catch (e) {}
+    this.setState({ saved, user, showLogin: !user });
+    this.initGoogle();
+  }
+
+  initGoogle() {
+    import('./nanu-auth.js').then((m) => {
+      this._auth = m;
+      m.init((p) => this.onGoogleUser(p)).then((ok) => {
+        if (ok) { this.setState({ googleReady: true }); setTimeout(() => this.tryRenderGoogleBtn(), 0); }
+      });
+    }).catch(() => {});
+  }
+
+  tryRenderGoogleBtn() { if (this._auth && this._gEl) this._auth.renderButton(this._gEl, { width: 300 }); }
+
+  onGoogleUser(p) {
+    this.finishLogin({
+      name: p.name || 'Pengguna',
+      email: p.email || '',
+      initial: ((p.given_name || p.name || '?').trim()[0] || '?').toUpperCase(),
+      picture: p.picture || '',
+    });
+  }
+
+  persistSaved(saved) { try { localStorage.setItem('nanu_saved', JSON.stringify(saved)); } catch (e) {} }
+  persistUser(u) { try { localStorage.setItem('nanu_user', JSON.stringify(u)); } catch (e) {} }
+
+  showToast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+
+  openLogin() { this.setState({ showLogin: true }); }
+  closeLogin() { this.setState({ showLogin: false }); }
+  stop(e) { e.stopPropagation(); }
+
+  loginDemo() {
+    this.finishLogin({ name: 'Pengguna Nanu', email: 'kamu@gmail.com', initial: 'P', picture: '' });
+  }
+
+  finishLogin(user) {
+    this.setState({ user, showLogin: false });
+    this.persistUser(user);
+    this.showToast('Berhasil masuk');
+  }
+
+  logout() { this.setState({ user: null, showLogin: true }); this.persistUser(null); this.showToast('Kamu telah keluar'); }
+
+  removeSaved(item) {
+    const saved = this.state.saved.filter(s => s.name !== item.name);
+    this.setState({ saved });
+    this.persistSaved(saved);
+    this.showToast('Dihapus dari koleksi');
+  }
+
+  openShare(item) { this.setState({ shareTarget: item }); }
+  closeShare() { this.setState({ shareTarget: null }); }
+
+  shareTo(channel) {
+    const it = this.state.shareTarget; if (!it) return;
+    const text = it.name + ' — ' + it.meaning + ' (via Nanu)';
+    const url = 'https://nanu.app/nama/' + encodeURIComponent(it.name.toLowerCase().replace(/\s+/g, '-'));
+    try {
+      if (channel === 'whatsapp') window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank');
+      else if (channel === 'facebook') window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(text), '_blank');
+      else if (channel === 'instagram') { if (navigator.clipboard) navigator.clipboard.writeText(text + ' ' + url); this.showToast('Teks disalin · tempel di Instagram'); }
+      else if (channel === 'copy') { if (navigator.clipboard) navigator.clipboard.writeText(text + ' ' + url); this.showToast('Tautan disalin ke clipboard'); }
+    } catch (e) {}
+    this.setState({ shareTarget: null });
+  }
+
+  buildItem(r, i) {
+    const accents = [
+      { bg: '#FDEAE4', fg: '#E0492A' }, { bg: '#FFF3D2', fg: '#C98A00' },
+      { bg: '#E2F2EA', fg: '#2E8B5E' }, { bg: '#E6F0FA', fg: '#185FA4' },
+      { bg: '#FCE9E7', fg: '#D86A5A' }, { bg: '#EAF3FC', fg: '#3E7CB1' },
+    ];
+    const ac = accents[i % accents.length];
+    return {
+      name: r.name, meaning: r.meaning,
+      initial: (r.name || '?').charAt(0).toUpperCase(),
+      badgeStyle: "width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:'Baloo 2',cursive;font-weight:700;font-size:24px;background:" + ac.bg + ";color:" + ac.fg,
+      onShare: () => this.openShare(r),
+      onRemove: () => this.removeSaved(r),
+    };
+  }
+
+  renderVals() {
+    const st = this.state;
+    const loggedIn = !!st.user;
+    const savedItems = st.saved.map((r, i) => this.buildItem(r, i));
+    const sh = st.shareTarget;
+
+    return {
+      isLocked: !loggedIn,
+      savedEmpty: loggedIn && st.saved.length === 0,
+      savedHas: loggedIn && st.saved.length > 0,
+      savedItems,
+
+      hasUser: loggedIn,
+      noUser: !loggedIn,
+      userInitial: st.user ? st.user.initial : '',
+      openLogin: () => this.openLogin(),
+      logout: () => this.logout(),
+
+      showLogin: st.showLogin,
+      closeLogin: () => this.closeLogin(),
+      loginDemo: () => this.loginDemo(),
+      googleReady: st.googleReady,
+      notGoogleReady: !st.googleReady,
+      googleMount: (el) => { this._gEl = el; if (el) this.tryRenderGoogleBtn(); },
+      hasAvatar: !!(st.user && st.user.picture),
+      noAvatar: !(st.user && st.user.picture),
+      userPicture: st.user ? st.user.picture : '',
+      userName: st.user ? st.user.name : '',
+      userEmail: st.user ? st.user.email : '',
+      menuOpen: st.menuOpen,
+      openMenu: () => this.setState({ menuOpen: true }),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
+      avatarStyle: (st.user && st.user.picture) ? 'width:34px;height:34px;border-radius:50%;background-size:cover;background-position:center;background-repeat:no-repeat;background-image:url("' + st.user.picture + '")' : 'width:34px;height:34px;border-radius:50%;background:#3CA274',
+      stop: (e) => this.stop(e),
+
+      hasShare: !!sh,
+      shareName: sh ? sh.name : '',
+      shareMeaning: sh ? sh.meaning : '',
+      closeShare: () => this.closeShare(),
+      shareWhatsapp: () => this.shareTo('whatsapp'),
+      shareInstagram: () => this.shareTo('instagram'),
+      shareFacebook: () => this.shareTo('facebook'),
+      shareCopy: () => this.shareTo('copy'),
+
+      hasToast: !!st.toast,
+      toast: st.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
