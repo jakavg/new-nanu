@@ -56,6 +56,22 @@ export async function getUser() {
   };
 }
 
+// Access token sesi aktif (dipakai untuk memanggil serverless function secara aman).
+export async function getAccessToken() {
+  const c = await getClient();
+  if (!c) return null;
+  const { data } = await c.auth.getSession();
+  return (data && data.session && data.session.access_token) || null;
+}
+
+// Status premium user yang login (dibaca dari tabel profiles, dilindungi RLS).
+export async function isPremium() {
+  const c = await getClient();
+  if (!c) return false;
+  const { data } = await c.from('profiles').select('is_premium').maybeSingle();
+  return !!(data && data.is_premium);
+}
+
 // Login Google lewat Supabase Auth (redirect penuh ke Google lalu balik ke redirectTo).
 export async function signInWithGoogle(redirectTo) {
   const c = await getClient();

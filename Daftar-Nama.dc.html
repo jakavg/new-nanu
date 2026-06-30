@@ -11,7 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-iD6QTYll9tRHRazj"></script>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -186,17 +187,31 @@
         <img src="assets/nanu-logo.png" alt="Nanu" style="height:30px;margin:0 auto 22px;display:block">
         <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Masuk untuk menyimpan</h3>
         <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 26px">Simpan nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.</p>
-        <sc-if value="{{ googleReady }}">
-          <div ref="{{ googleMount }}" style="display:flex;justify-content:center;margin-bottom:12px;min-height:44px"></div>
-          <button onClick="{{ loginDemo }}" style="background:none;border:none;color:#A9B3B8;font-weight:600;font-size:12.5px;cursor:pointer">Masuk mode demo untuk uji coba</button>
-        </sc-if>
-        <sc-if value="{{ notGoogleReady }}">
-          <button onClick="{{ loginDemo }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
-            Lanjutkan dengan Google
-          </button>
-        </sc-if>
+        <button onClick="{{ doLogin }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
+          Lanjutkan dengan Google
+        </button>
         <button onClick="{{ closeLogin }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ UPGRADE / PAYMENT MODAL ============ -->
+  <sc-if value="{{ showUpgrade }}">
+    <div onClick="{{ closeUpgrade }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:26px;max-width:380px;width:100%;padding:34px 30px;text-align:center;animation:nanuPop .28s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)">
+        <div style="width:60px;height:60px;border-radius:50%;background:#FDEAE4;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#EE5B3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9z"></path></svg>
+        </div>
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Buka nama tak terbatas</h3>
+        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 18px">Sekali bayar, nikmati &ldquo;Muat lebih banyak&rdquo; tanpa batas selamanya.</p>
+        <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:30px;color:#0B2A3A;margin-bottom:4px">{{ priceText }}</div>
+        <p style="color:#8A969C;font-size:12.5px;margin:0 0 22px">Sekali bayar &middot; QRIS / e-wallet / kartu</p>
+        <button onClick="{{ startPayment }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#EE5B3A;border:none;color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;padding:14px;border-radius:14px;cursor:pointer" style-hover="filter:brightness(1.05)">
+          <sc-if value="{{ paying }}"><span style="width:18px;height:18px;border:2.5px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:nanuSpin .8s linear infinite"></span> Memproses…</sc-if>
+          <sc-if value="{{ notPaying }}">Bayar dengan QRIS</sc-if>
+        </button>
+        <button onClick="{{ closeUpgrade }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
       </div>
     </div>
   </sc-if>
@@ -246,15 +261,15 @@ class Component extends DCLogic {
     keyword: '', origin: 'jawa', length: '2', gender: 'lk',
     loading: true, loadingMore: false, filterOpen: false, error: '',
     results: [], saved: [], user: null,
-    showLogin: false, pendingSave: null, pendingLoadMore: false,
-    shareTarget: null, toast: '', googleReady: false, menuOpen: false,
+    showLogin: false,
+    shareTarget: null, toast: '', menuOpen: false,
+    premium: false, accessToken: null, showUpgrade: false, paying: false,
   };
 
   componentDidMount() {
-    let saved = [], user = null;
+    let saved = [];
     try {
       const s = JSON.parse(localStorage.getItem('nanu_saved') || '[]');
-      user = JSON.parse(localStorage.getItem('nanu_user') || 'null');
       saved = Array.isArray(s) ? s : [];
     } catch (e) {}
 
@@ -270,32 +285,28 @@ class Component extends DCLogic {
     if (!['2', '3'].includes(length)) length = '2';
     if (!['lk', 'pr'].includes(gender)) gender = 'lk';
 
-    this.setState({ saved, user, origin, length, gender, keyword }, () => this.generate());
-    this.initGoogle();
+    this.setState({ saved, origin, length, gender, keyword }, () => this.generate());
+    this.initAuth();
   }
 
-  initGoogle() {
-    import('./nanu-auth.js').then((m) => {
-      this._auth = m;
-      m.init((p) => this.onGoogleUser(p)).then((ok) => {
-        if (ok) { this.setState({ googleReady: true }); setTimeout(() => this.tryRenderGoogleBtn(), 0); }
-      });
+  initAuth() {
+    import('./nanu-supabase.js').then(async (m) => {
+      this._sb = m;
+      try {
+        const user = await m.getUser();
+        if (user) {
+          const [premium, token] = await Promise.all([m.isPremium(), m.getAccessToken()]);
+          this.setState({ user, premium, accessToken: token });
+        }
+      } catch (e) {}
     }).catch(() => {});
   }
 
-  tryRenderGoogleBtn() { if (this._auth && this._gEl) this._auth.renderButton(this._gEl, { width: 300 }); }
-
-  onGoogleUser(p) {
-    this.finishLogin({
-      name: p.name || 'Pengguna',
-      email: p.email || '',
-      initial: ((p.given_name || p.name || '?').trim()[0] || '?').toUpperCase(),
-      picture: p.picture || '',
-    });
+  doLogin() {
+    if (this._sb) this._sb.signInWithGoogle(window.location.href);
   }
 
   persistSaved(saved) { try { localStorage.setItem('nanu_saved', JSON.stringify(saved)); } catch (e) {} }
-  persistUser(u) { try { localStorage.setItem('nanu_user', JSON.stringify(u)); } catch (e) {} }
   syncQuery() {
     const { origin, length, gender } = this.state;
     const kw = this.state.keyword.trim();
@@ -357,16 +368,21 @@ class Component extends DCLogic {
 
   async loadMore() {
     if (this.state.loadingMore) return;
-    if (!this.state.user) { this.setState({ showLogin: true, pendingLoadMore: true }); return; }
+    if (!this.state.user) { this.setState({ showLogin: true }); return; }
+    if (!this.state.premium) { this.setState({ showUpgrade: true }); return; }
     const count = this.props.resultsCount ?? 5;
     const existing = this.state.results.map(r => r.name);
     this.setState({ loadingMore: true });
     try {
-      const raw = await this.ai(this.buildPrompt(count, existing));
+      const raw = await this.ai(this.buildPrompt(count, existing), 'more');
       const fresh = this.parse(raw).filter(d => !existing.includes(d.name));
       this.setState(s => ({ results: s.results.concat(fresh), loadingMore: false }));
       if (!fresh.length) this.showToast('Tidak ada nama baru, coba ubah filter');
     } catch (e) {
+      if (String(e && e.message) === 'premium-required') {
+        this.setState({ loadingMore: false, premium: false, showUpgrade: true });
+        return;
+      }
       // API belum aktif → tambahkan contoh nama.
       const demo = this.demoNames(count, existing).filter(d => !existing.includes(d.name));
       if (demo.length) {
@@ -381,14 +397,18 @@ class Component extends DCLogic {
 
   regenerate() { this.generate(); }
 
-  async ai(prompt) {
+  async ai(prompt, mode) {
     // Panggil Claude lewat serverless function (api/generate.js) agar API key
-    // tetap aman di server dan tidak pernah ikut ke browser.
+    // tetap aman di server dan tidak pernah ikut ke browser. Untuk mode 'more'
+    // (Muat lebih banyak) kirim token sesi agar server bisa cek status premium.
+    const headers = { 'Content-Type': 'application/json' };
+    if (mode === 'more' && this.state.accessToken) headers.Authorization = 'Bearer ' + this.state.accessToken;
     const resp = await fetch('/api/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
+      headers,
+      body: JSON.stringify({ prompt, mode: mode || 'initial' }),
     });
+    if (resp.status === 402) throw new Error('premium-required');
     if (!resp.ok) throw new Error('api ' + resp.status);
     const data = await resp.json();
     return data.text || '';
@@ -494,7 +514,7 @@ class Component extends DCLogic {
   isSaved(name) { return this.state.saved.some(s => s.name === name); }
 
   toggleSave(item) {
-    if (!this.state.user) { this.setState({ showLogin: true, pendingSave: item }); return; }
+    if (!this.state.user) { this.setState({ showLogin: true }); return; }
     const exists = this.isSaved(item.name);
     let saved;
     if (exists) { saved = this.state.saved.filter(s => s.name !== item.name); this.showToast('Dihapus dari koleksi'); }
@@ -504,30 +524,63 @@ class Component extends DCLogic {
   }
 
   openLogin() { this.setState({ showLogin: true }); }
-  closeLogin() { this.setState({ showLogin: false, pendingSave: null, pendingLoadMore: false }); }
+  closeLogin() { this.setState({ showLogin: false }); }
   stop(e) { e.stopPropagation(); }
 
-  loginDemo() {
-    this.finishLogin({ name: 'Pengguna Nanu', email: 'kamu@gmail.com', initial: 'P', picture: '' });
+  async logout() {
+    try { if (this._sb) await this._sb.signOut(); } catch (e) {}
+    this.setState({ user: null, premium: false, accessToken: null, menuOpen: false });
+    this.showToast('Kamu telah keluar');
   }
 
-  finishLogin(user) {
-    const p = this.state.pendingSave;
-    let saved = this.state.saved;
-    let msg = 'Berhasil masuk';
-    if (p && !this.isSaved(p.name)) {
-      saved = [{ name: p.name, meaning: p.meaning, origin: this.state.origin, ts: Date.now() }, ...saved];
-      this.persistSaved(saved);
-      msg = 'Berhasil masuk · nama tersimpan';
+  // ===== Pembayaran Midtrans (QRIS) untuk membuka generate tak terbatas =====
+  openUpgrade() { this.setState({ showUpgrade: true }); }
+  closeUpgrade() { this.setState({ showUpgrade: false }); }
+
+  async startPayment() {
+    if (!this.state.user) { this.setState({ showUpgrade: false, showLogin: true }); return; }
+    if (!window.snap) { this.showToast('Pembayaran belum siap, coba lagi sebentar'); return; }
+    this.setState({ paying: true });
+    try {
+      const token = this.state.accessToken || (this._sb && await this._sb.getAccessToken());
+      const resp = await fetch('/api/payment/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      });
+      const data = await resp.json();
+      if (data.alreadyPremium) { this.setState({ premium: true, paying: false, showUpgrade: false }); this.showToast('Kamu sudah premium'); return; }
+      if (!resp.ok || !data.token) throw new Error('create-failed');
+      this.setState({ paying: false });
+      window.snap.pay(data.token, {
+        onSuccess: () => this.afterPay(data.orderId),
+        onPending: () => this.afterPay(data.orderId),
+        onError: () => this.showToast('Pembayaran gagal'),
+        onClose: () => this.showToast('Jendela pembayaran ditutup'),
+      });
+    } catch (e) {
+      this.setState({ paying: false });
+      this.showToast('Gagal memulai pembayaran');
     }
-    const wantMore = this.state.pendingLoadMore;
-    this.setState({ user, showLogin: false, pendingSave: null, pendingLoadMore: false, saved });
-    this.persistUser(user);
-    this.showToast(msg);
-    if (wantMore) setTimeout(() => this.loadMore(), 120);
   }
 
-  logout() { this.setState({ user: null }); this.persistUser(null); this.showToast('Kamu telah keluar'); }
+  async afterPay(orderId) {
+    this.setState({ showUpgrade: false });
+    this.showToast('Memverifikasi pembayaran…');
+    for (let i = 0; i < 12; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      try {
+        const token = this.state.accessToken || (this._sb && await this._sb.getAccessToken());
+        const r = await fetch('/api/payment/status?order_id=' + encodeURIComponent(orderId), { headers: { Authorization: 'Bearer ' + token } });
+        const d = await r.json();
+        if (d.premium) {
+          this.setState({ premium: true });
+          this.showToast('Pembayaran berhasil · generate tak terbatas aktif');
+          return;
+        }
+      } catch (e) {}
+    }
+    this.showToast('Pembayaran sedang diproses, tunggu sebentar lalu coba lagi');
+  }
 
   goSaved() {
     if (this.state.user) { window.location.href = 'Nama-Tersimpan.dc.html'; return; }
@@ -634,10 +687,15 @@ class Component extends DCLogic {
 
       showLogin: st.showLogin,
       closeLogin: () => this.closeLogin(),
-      loginDemo: () => this.loginDemo(),
-      googleReady: st.googleReady,
-      notGoogleReady: !st.googleReady,
-      googleMount: (el) => { this._gEl = el; if (el) this.tryRenderGoogleBtn(); },
+      doLogin: () => this.doLogin(),
+
+      showUpgrade: st.showUpgrade,
+      closeUpgrade: () => this.closeUpgrade(),
+      startPayment: () => this.startPayment(),
+      paying: st.paying,
+      notPaying: !st.paying,
+      priceText: 'Rp 49.999',
+
       hasAvatar: !!(st.user && st.user.picture),
       noAvatar: !(st.user && st.user.picture),
       userPicture: st.user ? st.user.picture : '',
