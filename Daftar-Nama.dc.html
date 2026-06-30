@@ -368,8 +368,16 @@ class Component extends DCLogic {
   regenerate() { this.generate(); }
 
   async ai(prompt) {
-    // Sementara pakai Claude saja sampai development selesai.
-    return window.claude.complete(prompt);
+    // Panggil Claude lewat serverless function (api/generate.js) agar API key
+    // tetap aman di server dan tidak pernah ikut ke browser.
+    const resp = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!resp.ok) throw new Error('api ' + resp.status);
+    const data = await resp.json();
+    return data.text || '';
   }
 
   parse(raw) {
