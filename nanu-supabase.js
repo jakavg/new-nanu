@@ -8,8 +8,8 @@
 // sehingga preview tetap berjalan. Begitu diisi + di-deploy, login Google asli
 // dan penyimpanan cloud per akun langsung aktif.
 
-export const SUPABASE_URL = '';        // mis. https://abcdefgh.supabase.co
-export const SUPABASE_ANON_KEY = '';   // anon public key (aman dipakai di frontend)
+export const SUPABASE_URL = 'https://bsqiavisuorqgrywcblx.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_4ky4s59MkwTA6QT6FMg7cA_BXxQgUdM'; // publishable key — aman di frontend (dilindungi RLS)
 
 let _client = null;
 
