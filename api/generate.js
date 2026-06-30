@@ -1,6 +1,6 @@
-// Vercel Serverless Function — memanggil OpenAI di sisi server (sementara).
-// API key TIDAK PERNAH dikirim ke browser; dibaca dari env var OPENAI_API_KEY.
-const OpenAI = require('openai');
+// Vercel Serverless Function — memanggil Claude di sisi server.
+// API key TIDAK PERNAH dikirim ke browser; dibaca dari env var ANTHROPIC_API_KEY.
+const Anthropic = require('@anthropic-ai/sdk');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -8,9 +8,9 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    res.status(500).json({ error: 'OPENAI_API_KEY belum diset di server.' });
+    res.status(500).json({ error: 'ANTHROPIC_API_KEY belum diset di server.' });
     return;
   }
 
@@ -26,18 +26,18 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const client = new OpenAI({ apiKey });
-    const completion = await client.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    const client = new Anthropic({ apiKey });
+    const message = await client.messages.create({
+      model: process.env.ANTHROPIC_MODEL || 'claude-opus-4-8',
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
     });
-    const text = (completion.choices &&
-      completion.choices[0] &&
-      completion.choices[0].message &&
-      completion.choices[0].message.content) || '';
+    const text = message.content
+      .filter((b) => b.type === 'text')
+      .map((b) => b.text)
+      .join('');
     res.status(200).json({ text });
   } catch (e) {
-    res.status(502).json({ error: 'Gagal menghubungi OpenAI.', detail: String((e && e.message) || e) });
+    res.status(502).json({ error: 'Gagal menghubungi Claude.', detail: String((e && e.message) || e) });
   }
 };
