@@ -344,6 +344,13 @@ class Component extends DCLogic {
       if (!data.length) throw new Error('empty');
       this.setState({ results: data, loading: false });
     } catch (e) {
+      // API belum aktif → tampilkan contoh nama agar situs tetap berfungsi.
+      const demo = this.demoNames(count, []);
+      if (demo.length) {
+        this.setState({ results: demo, loading: false, error: '' });
+        this.showToast('Menampilkan contoh nama (mode demo)');
+        return;
+      }
       this.setState({ loading: false, error: 'Gagal membuat nama. Periksa koneksi lalu coba lagi ya.' });
     }
   }
@@ -360,6 +367,13 @@ class Component extends DCLogic {
       this.setState(s => ({ results: s.results.concat(fresh), loadingMore: false }));
       if (!fresh.length) this.showToast('Tidak ada nama baru, coba ubah filter');
     } catch (e) {
+      // API belum aktif → tambahkan contoh nama.
+      const demo = this.demoNames(count, existing).filter(d => !existing.includes(d.name));
+      if (demo.length) {
+        this.setState(s => ({ results: s.results.concat(demo), loadingMore: false }));
+        this.showToast('Menampilkan contoh nama (mode demo)');
+        return;
+      }
       this.setState({ loadingMore: false });
       this.showToast('Gagal memuat lebih banyak');
     }
@@ -391,6 +405,90 @@ class Component extends DCLogic {
       return arr.filter(x => x && x.name && x.meaning)
         .map(x => ({ name: String(x.name).trim(), meaning: String(x.meaning).trim() }));
     } catch (e) { return []; }
+  }
+
+  // ===== Fallback demo: dipakai hanya bila API belum aktif (mis. kredit habis). =====
+  _demoPool() {
+    const pools = {
+      jawa: {
+        lk: [
+          { w: 'Bagas', a: 'sehat dan kuat' }, { w: 'Bayu', a: 'angin kehidupan' },
+          { w: 'Arga', a: 'gunung yang kokoh' }, { w: 'Galih', a: 'keteguhan hati' },
+          { w: 'Jati', a: 'jiwa yang sejati' }, { w: 'Seta', a: 'kesucian' },
+          { w: 'Wira', a: 'keberanian ksatria' }, { w: 'Adi', a: 'keutamaan' },
+          { w: 'Cahya', a: 'cahaya terang' }, { w: 'Nata', a: 'jiwa pemimpin' },
+        ],
+        pr: [
+          { w: 'Ayu', a: 'kecantikan' }, { w: 'Sari', a: 'saripati terbaik' },
+          { w: 'Wening', a: 'ketenangan jiwa' }, { w: 'Lintang', a: 'bintang' },
+          { w: 'Sekar', a: 'bunga yang indah' }, { w: 'Ratih', a: 'kasih dewi bulan' },
+          { w: 'Arum', a: 'keharuman' }, { w: 'Asih', a: 'kasih sayang' },
+          { w: 'Galuh', a: 'permata' }, { w: 'Nirmala', a: 'kesucian tanpa cela' },
+        ],
+      },
+      sansekerta: {
+        lk: [
+          { w: 'Aditya', a: 'matahari' }, { w: 'Arjuna', a: 'ksatria cemerlang' },
+          { w: 'Bima', a: 'kekuatan perkasa' }, { w: 'Chandra', a: 'bulan' },
+          { w: 'Dharma', a: 'kebajikan' }, { w: 'Indra', a: 'pemimpin para dewa' },
+          { w: 'Surya', a: 'mentari' }, { w: 'Wijaya', a: 'kemenangan' },
+          { w: 'Satya', a: 'kebenaran' }, { w: 'Teja', a: 'cahaya kemilau' },
+        ],
+        pr: [
+          { w: 'Amara', a: 'keabadian' }, { w: 'Citra', a: 'gambaran yang istimewa' },
+          { w: 'Gita', a: 'nyanyian indah' }, { w: 'Indira', a: 'keindahan' },
+          { w: 'Kirana', a: 'sinar cahaya' }, { w: 'Padma', a: 'teratai suci' },
+          { w: 'Shanti', a: 'kedamaian' }, { w: 'Tara', a: 'bintang' },
+          { w: 'Maya', a: 'pesona' }, { w: 'Anindya', a: 'kesempurnaan tanpa cela' },
+        ],
+      },
+      islami: {
+        lk: [
+          { w: 'Ahmad', a: 'yang terpuji' }, { w: 'Faiz', a: 'keberuntungan' },
+          { w: 'Hakim', a: 'kebijaksanaan' }, { w: 'Khalil', a: 'sahabat setia' },
+          { w: 'Luthfi', a: 'kelembutan' }, { w: 'Rizki', a: 'karunia rezeki' },
+          { w: 'Zaki', a: 'kecerdasan yang suci' }, { w: 'Hanif', a: 'keteguhan dalam kebenaran' },
+          { w: 'Naufal', a: 'kedermawanan' }, { w: 'Fattah', a: 'pembuka jalan kebaikan' },
+        ],
+        pr: [
+          { w: 'Aisyah', a: 'penuh kehidupan' }, { w: 'Faiza', a: 'kemenangan' },
+          { w: 'Hana', a: 'kebahagiaan' }, { w: 'Lathifah', a: 'kelembutan' },
+          { w: 'Nadia', a: 'awal yang penuh harapan' }, { w: 'Rahma', a: 'kasih sayang' },
+          { w: 'Salma', a: 'kedamaian' }, { w: 'Zahra', a: 'bunga yang bersinar' },
+          { w: 'Husna', a: 'kebaikan terindah' }, { w: 'Nabila', a: 'kecerdasan yang mulia' },
+        ],
+      },
+    };
+    const byOrigin = pools[this.state.origin] || pools.jawa;
+    return byOrigin[this.state.gender] || byOrigin.lk;
+  }
+
+  demoNames(count, exclude) {
+    const pool = this._demoPool();
+    const len = this.state.length === '3' ? 3 : 2;
+    const ex = new Set(exclude || []);
+    const out = [];
+    let guard = 0;
+    while (out.length < count && guard < 300) {
+      guard++;
+      const parts = [];
+      const used = new Set();
+      while (parts.length < len) {
+        const p = pool[Math.floor(Math.random() * pool.length)];
+        if (used.has(p.w)) continue;
+        used.add(p.w); parts.push(p);
+      }
+      const name = parts.map((p) => p.w).join(' ');
+      if (ex.has(name) || out.some((o) => o.name === name)) continue;
+      let meaning;
+      if (parts.length === 2) {
+        meaning = parts[0].w + ' bermakna ' + parts[0].a + ', dipadu ' + parts[1].w + ' yang berarti ' + parts[1].a + '.';
+      } else {
+        meaning = parts[0].w + ' bermakna ' + parts[0].a + ', ' + parts[1].w + ' yang berarti ' + parts[1].a + ', serta ' + parts[2].w + ' yang melambangkan ' + parts[2].a + '.';
+      }
+      out.push({ name, meaning });
+    }
+    return out;
   }
 
   isSaved(name) { return this.state.saved.some(s => s.name === name); }
