@@ -19,4 +19,11 @@ $RECYCLE.BIN/
 # Node
 node_modules/
 
+# Local env (pulled from Vercel — contains secrets)
+.env
+.env.local
+.env*.local
+
 .vercel
+
+.env*

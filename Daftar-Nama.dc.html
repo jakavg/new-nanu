@@ -349,7 +349,7 @@ class Component extends DCLogic {
     const count = this.props.resultsCount ?? 5;
     this.setState({ loading: true, error: '', results: [] });
     try {
-      const raw = await this.ai(this.buildPrompt(count, []));
+      const raw = await this.ai(this.buildPrompt(count, []), 'initial', { count, exclude: [] });
       const data = this.parse(raw);
       if (!data.length) throw new Error('empty');
       this.setState({ results: data, loading: false });
@@ -373,7 +373,7 @@ class Component extends DCLogic {
     const existing = this.state.results.map(r => r.name);
     this.setState({ loadingMore: true });
     try {
-      const raw = await this.ai(this.buildPrompt(count, existing), 'more');
+      const raw = await this.ai(this.buildPrompt(count, existing), 'more', { count, exclude: existing });
       const fresh = this.parse(raw).filter(d => !existing.includes(d.name));
       this.setState(s => ({ results: s.results.concat(fresh), loadingMore: false }));
       if (!fresh.length) this.showToast('Tidak ada nama baru, coba ubah filter');
@@ -396,16 +396,26 @@ class Component extends DCLogic {
 
   regenerate() { this.generate(); }
 
-  async ai(prompt, mode) {
-    // Panggil Claude lewat serverless function (api/generate.js) agar API key
-    // tetap aman di server dan tidak pernah ikut ke browser. Untuk mode 'more'
-    // (Muat lebih banyak) kirim token sesi agar server bisa cek status premium.
+  async ai(prompt, mode, extra) {
+    // Sumber nama via serverless function (api/generate.js): origin yang sudah
+    // punya "name bank" dilayani dari Supabase tanpa AI; sisanya pakai Claude
+    // (API key tetap aman di server). Kirim juga filter terstruktur agar server
+    // bisa query bank. Untuk mode 'more' kirim token sesi untuk cek premium.
     const headers = { 'Content-Type': 'application/json' };
     if (mode === 'more' && this.state.accessToken) headers.Authorization = 'Bearer ' + this.state.accessToken;
     const resp = await fetch('/api/generate', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ prompt, mode: mode || 'initial' }),
+      body: JSON.stringify({
+        prompt,
+        mode: mode || 'initial',
+        origin: this.state.origin,
+        gender: this.state.gender,
+        length: this.state.length,
+        keyword: (this.state.keyword || '').trim(),
+        count: (extra && extra.count) || (this.props.resultsCount ?? 5),
+        exclude: (extra && extra.exclude) || [],
+      }),
     });
     if (resp.status === 402) throw new Error('premium-required');
     if (!resp.ok) throw new Error('api ' + resp.status);
