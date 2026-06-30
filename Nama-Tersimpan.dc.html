@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -128,16 +128,10 @@
         <img src="assets/nanu-logo.png" alt="Nanu" style="height:30px;margin:0 auto 22px;display:block">
         <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Masuk ke Nanu</h3>
         <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 26px">Akses koleksi nama favoritmu dari perangkat mana pun.</p>
-        <sc-if value="{{ googleReady }}">
-          <div ref="{{ googleMount }}" style="display:flex;justify-content:center;margin-bottom:12px;min-height:44px"></div>
-          <button onClick="{{ loginDemo }}" style="background:none;border:none;color:#A9B3B8;font-weight:600;font-size:12.5px;cursor:pointer">Masuk mode demo untuk uji coba</button>
-        </sc-if>
-        <sc-if value="{{ notGoogleReady }}">
-          <button onClick="{{ loginDemo }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
-            Lanjutkan dengan Google
-          </button>
-        </sc-if>
+        <button onClick="{{ doLogin }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
+          Lanjutkan dengan Google
+        </button>
         <button onClick="{{ closeLogin }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
       </div>
     </div>
@@ -184,41 +178,30 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:640}}">
 class Component extends DCLogic {
-  state = { saved: [], user: null, showLogin: false, shareTarget: null, toast: '', googleReady: false, menuOpen: false };
+  state = { saved: [], user: null, showLogin: false, shareTarget: null, toast: '', menuOpen: false, loadingAuth: true };
 
   componentDidMount() {
-    let saved = [], user = null;
-    try {
-      const s = JSON.parse(localStorage.getItem('nanu_saved') || '[]');
-      user = JSON.parse(localStorage.getItem('nanu_user') || 'null');
-      saved = Array.isArray(s) ? s : [];
-    } catch (e) {}
-    this.setState({ saved, user, showLogin: !user });
-    this.initGoogle();
+    this.initAuth();
   }
 
-  initGoogle() {
-    import('./nanu-auth.js').then((m) => {
-      this._auth = m;
-      m.init((p) => this.onGoogleUser(p)).then((ok) => {
-        if (ok) { this.setState({ googleReady: true }); setTimeout(() => this.tryRenderGoogleBtn(), 0); }
-      });
-    }).catch(() => {});
+  initAuth() {
+    import('./nanu-supabase.js').then(async (m) => {
+      this._sb = m;
+      try {
+        const user = await m.getUser();
+        if (user) {
+          const saved = await m.fetchSaved();
+          this.setState({ user, saved, loadingAuth: false });
+        } else {
+          this.setState({ loadingAuth: false });
+        }
+      } catch (e) { this.setState({ loadingAuth: false }); }
+    }).catch(() => this.setState({ loadingAuth: false }));
   }
 
-  tryRenderGoogleBtn() { if (this._auth && this._gEl) this._auth.renderButton(this._gEl, { width: 300 }); }
-
-  onGoogleUser(p) {
-    this.finishLogin({
-      name: p.name || 'Pengguna',
-      email: p.email || '',
-      initial: ((p.given_name || p.name || '?').trim()[0] || '?').toUpperCase(),
-      picture: p.picture || '',
-    });
+  doLogin() {
+    if (this._sb) this._sb.signInWithGoogle(window.location.href);
   }
-
-  persistSaved(saved) { try { localStorage.setItem('nanu_saved', JSON.stringify(saved)); } catch (e) {} }
-  persistUser(u) { try { localStorage.setItem('nanu_user', JSON.stringify(u)); } catch (e) {} }
 
   showToast(msg) {
     this.setState({ toast: msg });
@@ -230,23 +213,17 @@ class Component extends DCLogic {
   closeLogin() { this.setState({ showLogin: false }); }
   stop(e) { e.stopPropagation(); }
 
-  loginDemo() {
-    this.finishLogin({ name: 'Pengguna Nanu', email: 'kamu@gmail.com', initial: 'P', picture: '' });
+  async logout() {
+    try { if (this._sb) await this._sb.signOut(); } catch (e) {}
+    this.setState({ user: null, saved: [], menuOpen: false });
+    this.showToast('Kamu telah keluar');
   }
-
-  finishLogin(user) {
-    this.setState({ user, showLogin: false });
-    this.persistUser(user);
-    this.showToast('Berhasil masuk');
-  }
-
-  logout() { this.setState({ user: null, showLogin: true }); this.persistUser(null); this.showToast('Kamu telah keluar'); }
 
   removeSaved(item) {
     const saved = this.state.saved.filter(s => s.name !== item.name);
     this.setState({ saved });
-    this.persistSaved(saved);
     this.showToast('Dihapus dari koleksi');
+    if (this._sb) this._sb.removeSaved(item.name);
   }
 
   openShare(item) { this.setState({ shareTarget: item }); }
@@ -288,7 +265,7 @@ class Component extends DCLogic {
     const sh = st.shareTarget;
 
     return {
-      isLocked: !loggedIn,
+      isLocked: !loggedIn && !st.loadingAuth,
       savedEmpty: loggedIn && st.saved.length === 0,
       savedHas: loggedIn && st.saved.length > 0,
       savedItems,
@@ -301,10 +278,7 @@ class Component extends DCLogic {
 
       showLogin: st.showLogin,
       closeLogin: () => this.closeLogin(),
-      loginDemo: () => this.loginDemo(),
-      googleReady: st.googleReady,
-      notGoogleReady: !st.googleReady,
-      googleMount: (el) => { this._gEl = el; if (el) this.tryRenderGoogleBtn(); },
+      doLogin: () => this.doLogin(),
       hasAvatar: !!(st.user && st.user.picture),
       noAvatar: !(st.user && st.user.picture),
       userPicture: st.user ? st.user.picture : '',

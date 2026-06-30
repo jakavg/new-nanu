@@ -267,12 +267,6 @@ class Component extends DCLogic {
   };
 
   componentDidMount() {
-    let saved = [];
-    try {
-      const s = JSON.parse(localStorage.getItem('nanu_saved') || '[]');
-      saved = Array.isArray(s) ? s : [];
-    } catch (e) {}
-
     const q = new URLSearchParams(window.location.search);
     let origin = q.get('origin'), length = q.get('length'), gender = q.get('gender'), keyword = q.get('keyword') || '';
     if (!origin) {
@@ -285,7 +279,7 @@ class Component extends DCLogic {
     if (!['2', '3'].includes(length)) length = '2';
     if (!['lk', 'pr'].includes(gender)) gender = 'lk';
 
-    this.setState({ saved, origin, length, gender, keyword }, () => this.generate());
+    this.setState({ origin, length, gender, keyword }, () => this.generate());
     this.initAuth();
   }
 
@@ -295,8 +289,8 @@ class Component extends DCLogic {
       try {
         const user = await m.getUser();
         if (user) {
-          const [premium, token] = await Promise.all([m.isPremium(), m.getAccessToken()]);
-          this.setState({ user, premium, accessToken: token });
+          const [premium, token, saved] = await Promise.all([m.isPremium(), m.getAccessToken(), m.fetchSaved()]);
+          this.setState({ user, premium, accessToken: token, saved });
         }
       } catch (e) {}
     }).catch(() => {});
@@ -306,7 +300,6 @@ class Component extends DCLogic {
     if (this._sb) this._sb.signInWithGoogle(window.location.href);
   }
 
-  persistSaved(saved) { try { localStorage.setItem('nanu_saved', JSON.stringify(saved)); } catch (e) {} }
   syncQuery() {
     const { origin, length, gender } = this.state;
     const kw = this.state.keyword.trim();
@@ -517,10 +510,16 @@ class Component extends DCLogic {
     if (!this.state.user) { this.setState({ showLogin: true }); return; }
     const exists = this.isSaved(item.name);
     let saved;
-    if (exists) { saved = this.state.saved.filter(s => s.name !== item.name); this.showToast('Dihapus dari koleksi'); }
-    else { saved = [{ name: item.name, meaning: item.meaning, origin: this.state.origin, ts: Date.now() }, ...this.state.saved]; this.showToast('Tersimpan di koleksi'); }
+    if (exists) {
+      saved = this.state.saved.filter(s => s.name !== item.name);
+      this.showToast('Dihapus dari koleksi');
+      if (this._sb) this._sb.removeSaved(item.name);
+    } else {
+      saved = [{ name: item.name, meaning: item.meaning, origin: this.state.origin, ts: Date.now() }, ...this.state.saved];
+      this.showToast('Tersimpan di koleksi');
+      if (this._sb) this._sb.addSaved({ name: item.name, meaning: item.meaning, origin: this.state.origin });
+    }
     this.setState({ saved });
-    this.persistSaved(saved);
   }
 
   openLogin() { this.setState({ showLogin: true }); }

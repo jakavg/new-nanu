@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -154,16 +154,10 @@
         <img src="assets/nanu-logo.png" alt="Nanu" style="height:30px;margin:0 auto 22px;display:block">
         <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Masuk ke Nanu</h3>
         <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 26px">Simpan &amp; kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.</p>
-        <sc-if value="{{ googleReady }}">
-          <div ref="{{ googleMount }}" style="display:flex;justify-content:center;margin-bottom:12px;min-height:44px"></div>
-          <button onClick="{{ loginDemo }}" style="background:none;border:none;color:#A9B3B8;font-weight:600;font-size:12.5px;cursor:pointer">Masuk mode demo untuk uji coba</button>
-        </sc-if>
-        <sc-if value="{{ notGoogleReady }}">
-          <button onClick="{{ loginDemo }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
-            Lanjutkan dengan Google
-          </button>
-        </sc-if>
+        <button onClick="{{ doLogin }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
+          Lanjutkan dengan Google
+        </button>
         <button onClick="{{ closeLogin }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
       </div>
     </div>
@@ -180,39 +174,29 @@
 class Component extends DCLogic {
   state = {
     keyword: '', origin: 'jawa', length: '2', gender: 'lk',
-    saved: [], user: null, showLogin: false, pendingNav: null, toast: '', googleReady: false, menuOpen: false, searching: false,
+    saved: [], user: null, showLogin: false, toast: '', menuOpen: false, searching: false,
   };
 
   componentDidMount() {
-    try {
-      const s = JSON.parse(localStorage.getItem('nanu_saved') || '[]');
-      const u = JSON.parse(localStorage.getItem('nanu_user') || 'null');
-      this.setState({ saved: Array.isArray(s) ? s : [], user: u });
-    } catch (e) {}
-    this.initGoogle();
+    this.initAuth();
   }
 
-  initGoogle() {
-    import('./nanu-auth.js').then((m) => {
-      this._auth = m;
-      m.init((p) => this.onGoogleUser(p)).then((ok) => {
-        if (ok) { this.setState({ googleReady: true }); setTimeout(() => this.tryRenderGoogleBtn(), 0); }
-      });
+  initAuth() {
+    import('./nanu-supabase.js').then(async (m) => {
+      this._sb = m;
+      try {
+        const user = await m.getUser();
+        if (user) {
+          const saved = await m.fetchSaved();
+          this.setState({ user, saved });
+        }
+      } catch (e) {}
     }).catch(() => {});
   }
 
-  tryRenderGoogleBtn() { if (this._auth && this._gEl) this._auth.renderButton(this._gEl, { width: 300 }); }
-
-  onGoogleUser(p) {
-    this.finishLogin({
-      name: p.name || 'Pengguna',
-      email: p.email || '',
-      initial: ((p.given_name || p.name || '?').trim()[0] || '?').toUpperCase(),
-      picture: p.picture || '',
-    });
+  doLogin() {
+    if (this._sb) this._sb.signInWithGoogle(window.location.href);
   }
-
-  persistUser(u) { try { localStorage.setItem('nanu_user', JSON.stringify(u)); } catch (e) {} }
 
   showToast(msg) {
     this.setState({ toast: msg });
@@ -240,27 +224,19 @@ class Component extends DCLogic {
 
   goSaved() {
     if (this.state.user) { window.location.href = 'Nama-Tersimpan.dc.html'; return; }
-    this.setState({ showLogin: true, pendingNav: 'saved' });
+    this.setState({ showLogin: true });
     this.showToast('Masuk dulu untuk melihat koleksi');
   }
 
-  openLogin() { this.setState({ showLogin: true, pendingNav: null }); }
-  closeLogin() { this.setState({ showLogin: false, pendingNav: null }); }
+  openLogin() { this.setState({ showLogin: true }); }
+  closeLogin() { this.setState({ showLogin: false }); }
   stop(e) { e.stopPropagation(); }
 
-  loginDemo() {
-    this.finishLogin({ name: 'Pengguna Nanu', email: 'kamu@gmail.com', initial: 'P', picture: '' });
+  async logout() {
+    try { if (this._sb) await this._sb.signOut(); } catch (e) {}
+    this.setState({ user: null, saved: [], menuOpen: false });
+    this.showToast('Kamu telah keluar');
   }
-
-  finishLogin(user) {
-    const nav = this.state.pendingNav;
-    this.setState({ user, showLogin: false, pendingNav: null });
-    this.persistUser(user);
-    if (nav === 'saved') { window.location.href = 'Nama-Tersimpan.dc.html'; return; }
-    this.showToast('Berhasil masuk');
-  }
-
-  logout() { this.setState({ user: null }); this.persistUser(null); this.showToast('Kamu telah keluar'); }
 
   renderVals() {
     const st = this.state;
@@ -316,10 +292,7 @@ class Component extends DCLogic {
 
       showLogin: st.showLogin,
       closeLogin: () => this.closeLogin(),
-      loginDemo: () => this.loginDemo(),
-      googleReady: st.googleReady,
-      notGoogleReady: !st.googleReady,
-      googleMount: (el) => { this._gEl = el; if (el) this.tryRenderGoogleBtn(); },
+      doLogin: () => this.doLogin(),
       hasAvatar: !!(st.user && st.user.picture),
       noAvatar: !(st.user && st.user.picture),
       userPicture: st.user ? st.user.picture : '',
