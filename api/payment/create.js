@@ -3,7 +3,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const midtransClient = require('midtrans-client');
 
-const PRICE = 1000; // TEST: Rp 1.000 untuk uji coba produksi — kembalikan ke 49999 sebelum launch
+const PRICE = 49999; // Rp 49.999 — gross_amount harus integer IDR
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }

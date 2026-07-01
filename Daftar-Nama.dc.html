@@ -614,8 +614,7 @@ class Component extends DCLogic {
       });
     } catch (e) {
       this.setState({ paying: false });
-      // DIAGNOSTIC (sementara): tampilkan pesan asli dari Midtrans agar mudah didiagnosis.
-      this.showToast('Gagal memulai pembayaran: ' + String((e && e.message) || e));
+      this.showToast('Gagal memulai pembayaran');
     }
   }
 
@@ -756,7 +755,7 @@ class Component extends DCLogic {
       startPayment: () => this.startPayment(),
       paying: st.paying,
       notPaying: !st.paying,
-      priceText: 'Rp 1.000',
+      priceText: 'Rp 49.999',
 
       hasAvatar: !!(st.user && st.user.picture),
       noAvatar: !(st.user && st.user.picture),
