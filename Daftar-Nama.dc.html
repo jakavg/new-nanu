@@ -574,7 +574,7 @@ class Component extends DCLogic {
       });
       const data = await resp.json();
       if (data.alreadyPremium) { this.setState({ premium: true, paying: false, showUpgrade: false }); this.showToast('Kamu sudah premium'); return; }
-      if (!resp.ok || !data.token) throw new Error('create-failed');
+      if (!resp.ok || !data.token) throw new Error(data.detail || data.error || 'create-failed');
       this.setState({ paying: false });
       window.snap.pay(data.token, {
         onSuccess: () => this.afterPay(data.orderId),
@@ -584,7 +584,8 @@ class Component extends DCLogic {
       });
     } catch (e) {
       this.setState({ paying: false });
-      this.showToast('Gagal memulai pembayaran');
+      // DIAGNOSTIC (sementara): tampilkan pesan asli dari Midtrans agar mudah didiagnosis.
+      this.showToast('Gagal memulai pembayaran: ' + String((e && e.message) || e));
     }
   }
 
