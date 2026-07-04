@@ -75,19 +75,32 @@
   </header>
 
   <main style="flex:1;width:100%">
-    <div style="max-width:720px;width:100%;margin:0 auto;padding:30px 20px 150px">
-      <a href="Nanu.dc.html" style="color:#5C6B72;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:18px;text-decoration:none">
+    <div style="max-width:720px;width:100%;margin:0 auto;padding:26px 20px 0">
+      <a href="Nanu.dc.html" style="color:#5C6B72;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;text-decoration:none">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
         Ubah pencarian
       </a>
+      <h2 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(24px,4.5vw,32px);margin:0;letter-spacing:-.01em">Rangkaian nama untukmu</h2>
+    </div>
 
-      <h2 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(24px,4.5vw,32px);margin:0 0 12px;letter-spacing:-.01em">Rangkaian nama untukmu</h2>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px">
-        <sc-if value="{{ hasKeyword }}"><span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:#0B2A3A"><span style="color:#8A969C">arti</span> {{ keyword }}</span></sc-if>
-        <span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:#0B2A3A">{{ originLabelText }}</span>
-        <span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:#0B2A3A">{{ lengthText }}</span>
-        <span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:#0B2A3A">{{ genderLabelText }}</span>
+    <!-- ====== STICKY FILTER BAR — chip ringkasan yang bisa diklik untuk ubah filter ====== -->
+    <div style="position:sticky;top:70px;z-index:39;background:rgba(249,239,235,.92);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC;margin-top:14px">
+      <div style="max-width:720px;width:100%;margin:0 auto;padding:11px 20px">
+        <button onClick="{{ toggleFilter }}" title="Ubah filter" style="width:100%;display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;padding:0;text-align:left">
+          <span style="flex:0 0 auto;display:flex;color:#0B2A3A"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg></span>
+          <div style="flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+            <sc-if value="{{ hasKeyword }}"><span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:#0B2A3A"><span style="color:#8A969C">arti</span> {{ keyword }}</span></sc-if>
+            <span style="display:inline-flex;align-items:center;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:#0B2A3A">{{ originLabelText }}</span>
+            <span style="display:inline-flex;align-items:center;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:#0B2A3A">{{ lengthText }}</span>
+            <span style="display:inline-flex;align-items:center;background:#fff;border:1px solid #EDE2DC;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:#0B2A3A">{{ genderLabelText }}</span>
+          </div>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0B2A3A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="{{ chevronStyle }}"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
       </div>
+    </div>
+
+    <!-- ====== KONTEN ====== -->
+    <div style="max-width:720px;width:100%;margin:0 auto;padding:22px 20px 60px">
 
       <!-- loading -->
       <sc-if value="{{ loading }}">
@@ -142,10 +155,11 @@
         </div>
       </sc-if>
 
-      <!-- ====== FLOATING FILTER ====== -->
-      <div style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:50;width:min(680px,calc(100% - 24px))">
-        <sc-if value="{{ filterOpen }}">
-          <div style="background:#fff;border:1px solid #EDE2DC;border-radius:22px;box-shadow:0 22px 54px -18px rgba(11,42,58,.45);padding:18px;margin-bottom:10px;animation:nanuPop .25s cubic-bezier(.2,.8,.3,1) both">
+      <!-- ====== FILTER DROPDOWN (turun dari bawah navbar) ====== -->
+      <sc-if value="{{ filterOpen }}">
+        <div onClick="{{ toggleFilter }}" style="position:fixed;inset:0;z-index:43;background:rgba(11,42,58,.28)"></div>
+        <div style="position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:45;width:min(680px,calc(100% - 24px))">
+          <div style="background:#fff;border:1px solid #EDE2DC;border-radius:22px;box-shadow:0 22px 54px -18px rgba(11,42,58,.45);padding:18px;animation:nanuPop .25s cubic-bezier(.2,.8,.3,1) both">
             <div style="position:relative;margin-bottom:14px">
               <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#A9B3B8;display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg></span>
               <input value="{{ keyword }}" onChange="{{ onKeyword }}" placeholder="Kata kunci arti (opsional)" style="width:100%;padding:12px 14px 12px 42px;border:2px solid #EDE2DC;border-radius:13px;font-size:15px;color:#0B2A3A;outline:none;background:#FCF7F4" style-focus="border-color:#3CA274;background:#fff">
@@ -170,15 +184,8 @@
               </button>
             </div>
           </div>
-        </sc-if>
-        <div style="display:flex;justify-content:center">
-          <button onClick="{{ toggleFilter }}" style="display:inline-flex;align-items:center;gap:10px;background:#0B2A3A;border:none;color:#fff;font-weight:700;font-size:14px;padding:13px 22px;border-radius:999px;cursor:pointer;box-shadow:0 16px 36px -12px rgba(11,42,58,.6);max-width:100%">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
-            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ filterSummary }}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="{{ chevronStyle }}"><path d="m6 9 6 6 6-6"></path></svg>
-          </button>
         </div>
-      </div>
+      </sc-if>
     </div>
   </main>
 
