@@ -31,19 +31,23 @@ module.exports = async (req, res) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Bila ada token sesi, ambil user_id terverifikasi (jangan percaya klaim client).
+  // Bila ada token sesi, ambil user_id + email akun terverifikasi (jangan percaya klaim client).
   let userId = null;
+  let accountEmail = null;
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
   if (token) {
     try {
       const { data } = await supabase.auth.getUser(token);
-      if (data && data.user) userId = data.user.id;
+      if (data && data.user) { userId = data.user.id; accountEmail = data.user.email || null; }
     } catch (e) { /* anonim */ }
   }
 
+  // Simpan email untuk follow-up: utamakan yang diketik user, jika kosong pakai email akun.
+  const finalEmail = email || accountEmail;
+
   const { error } = await supabase.from('feedback').insert({
     user_id: userId,
-    email,
+    email: finalEmail,
     message,
     page,
     user_agent: userAgent,
