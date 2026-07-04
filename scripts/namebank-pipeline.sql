@@ -139,6 +139,13 @@ CREATE OR REPLACE FUNCTION pick_bank_names(
       OR EXISTS (SELECT 1 FROM unnest(theme_tags) t WHERE t ILIKE '%' || p_keyword || '%')
     )
     AND (p_exclude IS NULL OR NOT (name = ANY(p_exclude)))
+    -- Blocklist: exclude names whose full name OR any source word matches a
+    -- name_blocklist pattern (ILIKE; patterns may use % wildcards). Empty list = no-op.
+    AND NOT EXISTS (
+      SELECT 1 FROM name_blocklist b
+      WHERE names_bank.name ILIKE b.pattern
+         OR EXISTS (SELECT 1 FROM unnest(names_bank.source_words) sw WHERE sw ILIKE b.pattern)
+    )
   ORDER BY random()
   LIMIT GREATEST(p_limit, 1);
 $$ LANGUAGE sql STABLE;
