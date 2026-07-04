@@ -1,8 +1,7 @@
-// Vercel Serverless Function — sumber nama.
-// Untuk origin yang sudah punya "name bank" (mis. islami) nama dilayani langsung
-// dari Supabase TANPA memanggil Claude (hemat kredit AI). Origin lain memakai Claude.
-// API key Claude TIDAK PERNAH dikirim ke browser; dibaca dari env ANTHROPIC_API_KEY.
-const Anthropic = require('@anthropic-ai/sdk');
+// Vercel Serverless Function — sumber nama 100% dari name bank (ZERO-AI).
+// Semua origin (islami, sansekerta, jawa) dilayani dari Supabase; TIDAK ADA
+// pemanggilan AI/Claude sama sekali. Bila kata kunci tak menemukan hasil, kata
+// kunci dilonggarkan (diabaikan) agar user tetap mendapat nama asli dari bank.
 const { createClient } = require('@supabase/supabase-js');
 
 function getServiceClient() {
@@ -27,8 +26,8 @@ async function requirePremium(req, supabase) {
   return { ok: true };
 }
 
-// Layani dari name bank (zero-AI). Mengembalikan array [{name,meaning}] atau null
-// bila origin tidak tercakup / tidak ada hasil (caller boleh fallback ke Claude).
+// Ambil dari name bank. Mengembalikan array [{name,meaning}] (bisa kosong) bila
+// origin tercakup, atau null bila origin belum punya bank / terjadi error.
 async function serveFromBank(supabase, { origin, gender, length, keyword, count, exclude }) {
   if (!supabase || !origin) return null;
   const { data: covered } = await supabase.rpc('bank_has_origin', { p_origin: origin });
@@ -41,8 +40,8 @@ async function serveFromBank(supabase, { origin, gender, length, keyword, count,
     p_limit: count || 5,
     p_exclude: Array.isArray(exclude) ? exclude : [],
   });
-  if (error || !data || !data.length) return null;
-  return data.map((r) => ({ name: r.name, meaning: r.meaning }));
+  if (error) return null;
+  return (data || []).map((r) => ({ name: r.name, meaning: r.meaning }));
 }
 
 module.exports = async (req, res) => {
@@ -51,12 +50,10 @@ module.exports = async (req, res) => {
     return;
   }
 
-  let prompt = '';
   let mode = 'initial';
   let filters = {};
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    prompt = body && body.prompt;
     if (body && body.mode) mode = body.mode;
     if (body) {
       filters = {
@@ -71,6 +68,7 @@ module.exports = async (req, res) => {
   } catch (e) {}
 
   const supabase = getServiceClient();
+  if (!supabase) { res.status(500).json({ error: 'Server belum dikonfigurasi.' }); return; }
 
   // Batch pertama gratis; "Muat lebih banyak" butuh premium.
   if (mode === 'more') {
@@ -78,42 +76,29 @@ module.exports = async (req, res) => {
     if (!gate.ok) { res.status(gate.code).json({ error: gate.error }); return; }
   }
 
-  // 1) Coba name bank dulu (zero-AI) untuk origin yang sudah tercakup.
   try {
-    const bank = await serveFromBank(supabase, filters);
-    if (bank && bank.length) {
-      res.status(200).json({ text: JSON.stringify(bank), source: 'bank' });
+    // 1) Coba dengan kata kunci.
+    const names = await serveFromBank(supabase, filters);
+    if (names === null) {
+      // Origin belum tercakup bank (semestinya tidak terjadi). Tanpa AI → kosongkan.
+      res.status(200).json({ text: '[]', source: 'bank', empty: true });
       return;
     }
+    if (names.length) {
+      res.status(200).json({ text: JSON.stringify(names), source: 'bank' });
+      return;
+    }
+    // 2) Kata kunci tak menemukan hasil → longgarkan (abaikan kata kunci).
+    if (filters.keyword) {
+      const relaxed = await serveFromBank(supabase, Object.assign({}, filters, { keyword: '' }));
+      if (relaxed && relaxed.length) {
+        res.status(200).json({ text: JSON.stringify(relaxed), source: 'bank', relaxed: true, keyword: filters.keyword });
+        return;
+      }
+    }
+    // 3) Tetap kosong (mis. exclude sudah menghabiskan bucket).
+    res.status(200).json({ text: '[]', source: 'bank', empty: true });
   } catch (e) {
-    // abaikan — lanjut ke Claude
-  }
-
-  // 2) Fallback ke Claude (origin belum punya bank, mis. jawa/sansekerta, atau
-  //    keyword yang tak ada di bank). Butuh prompt + API key.
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    res.status(500).json({ error: 'ANTHROPIC_API_KEY belum diset di server.' });
-    return;
-  }
-  if (!prompt || typeof prompt !== 'string') {
-    res.status(400).json({ error: 'Prompt tidak valid.' });
-    return;
-  }
-
-  try {
-    const client = new Anthropic({ apiKey });
-    const message = await client.messages.create({
-      model: process.env.ANTHROPIC_MODEL || 'claude-opus-4-8',
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: prompt }],
-    });
-    const text = message.content
-      .filter((b) => b.type === 'text')
-      .map((b) => b.text)
-      .join('');
-    res.status(200).json({ text });
-  } catch (e) {
-    res.status(502).json({ error: 'Gagal menghubungi Claude.', detail: String((e && e.message) || e) });
+    res.status(500).json({ error: 'Gagal mengambil nama.', detail: String((e && e.message) || e) });
   }
 };
