@@ -970,7 +970,7 @@
       "word": "Qomar",
       "meaning": "rembulan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "cahaya",
         "keindahan"
@@ -1007,7 +1007,7 @@
       "word": "Hikmah",
       "meaning": "hikmah kebijaksanaan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "bijak"
       ]
@@ -1016,7 +1016,7 @@
       "word": "Amanah",
       "meaning": "amanah tepercaya",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "amanah"
       ]
@@ -1034,7 +1034,7 @@
       "word": "Badr",
       "meaning": "bulan purnama",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "bulan"
       ]
@@ -1106,7 +1106,7 @@
       "word": "Mubarak",
       "meaning": "diberkahi",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "berkah"
       ]
@@ -1115,7 +1115,7 @@
       "word": "Mustaqim",
       "meaning": "lurus",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "teguh"
       ]
@@ -1124,7 +1124,7 @@
       "word": "Mahmud",
       "meaning": "terpuji",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "puji"
       ]
@@ -1133,7 +1133,7 @@
       "word": "Sadid",
       "meaning": "benar",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "benar"
       ]
@@ -1142,7 +1142,7 @@
       "word": "Rahim",
       "meaning": "penyayang",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "sayang"
       ]
@@ -1151,7 +1151,7 @@
       "word": "Wadud",
       "meaning": "pengasih",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "kasih"
       ]
@@ -1160,7 +1160,7 @@
       "word": "Muhsin",
       "meaning": "dermawan",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "baik"
       ]
@@ -1169,7 +1169,7 @@
       "word": "Syakur",
       "meaning": "bersyukur",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "syukur"
       ]
