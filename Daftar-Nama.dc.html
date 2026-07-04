@@ -61,6 +61,10 @@
                       <sc-if value="{{ isPremium }}"><div style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;background:#FFF4DA;color:#B77A00;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px"><svg width="11" height="11" viewBox="0 0 24 24" fill="#F6B93B"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"></path></svg>Premium</div></sc-if>
                     </div>
                   </div>
+                  <button onClick="{{ openFeedback }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid #EDE2DC;border-radius:10px;padding:10px;font-weight:700;font-size:13.5px;color:#0B2A3A;cursor:pointer;margin-bottom:8px" style-hover="border-color:#3CA274;color:#3CA274">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Beri masukan
+                  </button>
                   <button onClick="{{ logout }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#F9EFEB;border:1px solid #EDE2DC;border-radius:10px;padding:10px;font-weight:700;font-size:13.5px;color:#EE5B3A;cursor:pointer" style-hover="background:#FDEAE4;border-color:#EE5B3A">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
                     Keluar
@@ -257,6 +261,28 @@
     </div>
   </sc-if>
 
+  <!-- ============ FEEDBACK MODAL ============ -->
+  <sc-if value="{{ showFeedback }}">
+    <div onClick="{{ closeFeedback }}" style="position:fixed;inset:0;z-index:70;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:26px;max-width:420px;width:100%;padding:30px 26px;animation:nanuPop .28s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)">
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:22px;margin:0 0 6px;color:#0B2A3A">Beri masukan</h3>
+        <p style="color:#5C6B72;font-size:14px;line-height:1.5;margin:0 0 18px">Kritik, saran, atau laporan bug — semua membantu Nanu jadi lebih baik.</p>
+        <textarea value="{{ fbMsg }}" onChange="{{ onFbMsg }}" placeholder="Tulis masukanmu di sini…" style="width:100%;min-height:112px;resize:vertical;padding:13px 14px;border:2px solid #EDE2DC;border-radius:14px;font-size:15px;color:#0B2A3A;outline:none;background:#FCF7F4;font-family:inherit;line-height:1.5;box-sizing:border-box" style-focus="border-color:#3CA274;background:#fff"></textarea>
+        <sc-if value="{{ fbShowEmail }}">
+          <input value="{{ fbEmail }}" onChange="{{ onFbEmail }}" placeholder="Email (opsional, jika ingin dibalas)" style="width:100%;margin-top:10px;padding:12px 14px;border:2px solid #EDE2DC;border-radius:13px;font-size:14.5px;color:#0B2A3A;outline:none;background:#FCF7F4;box-sizing:border-box" style-focus="border-color:#3CA274;background:#fff">
+        </sc-if>
+        <input value="{{ fbHp }}" onChange="{{ onFbHp }}" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button onClick="{{ closeFeedback }}" style="flex:0 0 auto;background:#F9EFEB;border:1px solid #EDE2DC;border-radius:13px;padding:12px 18px;font-weight:700;font-size:14.5px;color:#5C6B72;cursor:pointer">Batal</button>
+          <button onClick="{{ submitFeedback }}" style="flex:1;background:#EE5B3A;border:none;color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;padding:12px;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="filter:brightness(1.05)">
+            <sc-if value="{{ fbSending }}"><span style="width:16px;height:16px;border:2.5px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:nanuSpin .8s linear infinite"></span>Mengirim…</sc-if>
+            <sc-if value="{{ fbNotSending }}">Kirim masukan</sc-if>
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <!-- ============ TOAST ============ -->
   <sc-if value="{{ hasToast }}">
     <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:80;background:#0B2A3A;color:#fff;font-weight:600;font-size:14px;padding:13px 22px;border-radius:999px;box-shadow:0 14px 40px -12px rgba(11,42,58,.6);animation:nanuToast .3s ease both;white-space:nowrap">{{ toast }}</div>
@@ -275,6 +301,7 @@ class Component extends DCLogic {
     loginMsg: 'Masuk untuk menyimpan nama favorit dan membuka fitur lainnya.',
     shareTarget: null, toast: '', menuOpen: false,
     premium: false, accessToken: null, showUpgrade: false, paying: false,
+    showFeedback: false, fbMsg: '', fbEmail: '', fbHp: '', fbSending: false,
   };
 
   componentDidMount() {
@@ -557,6 +584,33 @@ class Component extends DCLogic {
   openShare(item) { this.setState({ shareTarget: item }); }
   closeShare() { this.setState({ shareTarget: null }); }
 
+  // ===== Masukan / feedback =====
+  openFeedback() { this.setState({ showFeedback: true, menuOpen: false }); }
+  closeFeedback() { if (!this.state.fbSending) this.setState({ showFeedback: false }); }
+  setFb(k, v) { this.setState({ [k]: v }); }
+  async submitFeedback() {
+    if (this.state.fbSending) return;
+    const msg = (this.state.fbMsg || '').trim();
+    if (!msg) { this.showToast('Tulis dulu masukanmu ya'); return; }
+    this.setState({ fbSending: true });
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = this.state.accessToken || (this._sb && await this._sb.getAccessToken());
+      if (token) headers.Authorization = 'Bearer ' + token;
+      const resp = await fetch('/api/feedback', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ message: msg, email: (this.state.fbEmail || '').trim(), page: 'Daftar-Nama.dc.html', hp: this.state.fbHp || '' }),
+      });
+      if (!resp.ok) throw new Error('fail');
+      this.setState({ showFeedback: false, fbSending: false, fbMsg: '', fbEmail: '' });
+      this.showToast('Terima kasih atas masukanmu 🙏');
+    } catch (e) {
+      this.setState({ fbSending: false });
+      this.showToast('Gagal mengirim, coba lagi ya');
+    }
+  }
+
   shareTo(channel) {
     const it = this.state.shareTarget; if (!it) return;
     // Teks tunggal yang dibagikan: "Nama — Arti (Via nanu-rust.vercel.app)".
@@ -655,6 +709,20 @@ class Component extends DCLogic {
       goSaved: () => this.goSaved(),
       openLogin: () => this.openLogin(),
       logout: () => this.logout(),
+
+      showFeedback: st.showFeedback,
+      fbMsg: st.fbMsg,
+      fbEmail: st.fbEmail,
+      fbHp: st.fbHp,
+      fbSending: st.fbSending,
+      fbNotSending: !st.fbSending,
+      fbShowEmail: !st.user,
+      openFeedback: () => this.openFeedback(),
+      closeFeedback: () => this.closeFeedback(),
+      onFbMsg: (e) => this.setFb('fbMsg', e.target.value),
+      onFbEmail: (e) => this.setFb('fbEmail', e.target.value),
+      onFbHp: (e) => this.setFb('fbHp', e.target.value),
+      submitFeedback: () => this.submitFeedback(),
 
       showLogin: st.showLogin,
       loginTitle: st.loginTitle,
