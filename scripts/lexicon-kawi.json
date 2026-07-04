@@ -447,7 +447,7 @@
       "word": "Wulan",
       "meaning": "bulan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "keindahan"
       ]
@@ -456,7 +456,7 @@
       "word": "Asih",
       "meaning": "kasih sayang",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kasih"
       ]
@@ -474,7 +474,7 @@
       "word": "Laras",
       "meaning": "keselarasan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kedamaian"
       ]
@@ -582,7 +582,7 @@
       "word": "Hayu",
       "meaning": "keselamatan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "keselamatan"
       ]
@@ -681,7 +681,7 @@
       "word": "Wening",
       "meaning": "bening",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kedamaian"
       ]
@@ -690,7 +690,7 @@
       "word": "Suci",
       "meaning": "suci",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kesucian"
       ]
@@ -946,7 +946,7 @@
       "word": "Sasangka",
       "meaning": "rembulan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "bulan"
       ]
@@ -955,7 +955,7 @@
       "word": "Kartika",
       "meaning": "bintang",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "bintang"
       ]
@@ -973,7 +973,7 @@
       "word": "Samodra",
       "meaning": "samudra",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "laut"
       ]
@@ -982,7 +982,7 @@
       "word": "Giri",
       "meaning": "gunung",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "gunung"
       ]
@@ -991,7 +991,7 @@
       "word": "Prawata",
       "meaning": "pegunungan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "gunung"
       ]
@@ -1009,7 +1009,7 @@
       "word": "Riris",
       "meaning": "hujan gerimis",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "hujan"
       ]
@@ -1063,7 +1063,7 @@
       "word": "Kirana",
       "meaning": "sinar",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "cahaya"
       ]
@@ -1081,7 +1081,7 @@
       "word": "Mega",
       "meaning": "awan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "langit"
       ]
@@ -1144,7 +1144,7 @@
       "word": "Sembada",
       "meaning": "gagah",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "gagah"
       ]
@@ -1153,7 +1153,7 @@
       "word": "Rahayu",
       "meaning": "sejahtera",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "selamat"
       ]

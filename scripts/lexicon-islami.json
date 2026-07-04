@@ -442,7 +442,7 @@
       "word": "Rizki",
       "meaning": "rezeki",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "rezeki"
       ]
@@ -496,7 +496,7 @@
       "word": "Barakah",
       "meaning": "keberkahan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "keberkahan"
       ]
@@ -505,7 +505,7 @@
       "word": "Saadah",
       "meaning": "kebahagiaan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kebahagiaan"
       ]
@@ -514,7 +514,7 @@
       "word": "Nikmah",
       "meaning": "nikmat",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "rezeki",
         "syukur"
@@ -998,7 +998,7 @@
       "word": "Rahmat",
       "meaning": "rahmat dan kasih sayang",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "rahmat"
       ]
@@ -1025,7 +1025,7 @@
       "word": "Fajar",
       "meaning": "fajar",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "fajar"
       ]

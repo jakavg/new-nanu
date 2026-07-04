@@ -661,7 +661,7 @@
       "word": "Wijaya",
       "meaning": "kemenangan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "keberuntungan"
       ]
@@ -715,7 +715,7 @@
       "word": "Daya",
       "meaning": "kekuatan",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "kekuatan"
       ]
@@ -760,7 +760,7 @@
       "word": "Santi",
       "meaning": "kedamaian",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kedamaian"
       ]
@@ -814,7 +814,7 @@
       "word": "Kusuma",
       "meaning": "bunga",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "bunga"
       ]
@@ -895,7 +895,7 @@
       "word": "Suci",
       "meaning": "suci",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kesucian"
       ]
@@ -922,7 +922,7 @@
       "word": "Rahayu",
       "meaning": "sejahtera",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "keselamatan"
       ]
@@ -949,7 +949,7 @@
       "word": "Wening",
       "meaning": "jernih",
       "pos": "adj",
-      "gender": "uni",
+      "gender": "pr",
       "theme_tags": [
         "kedamaian"
       ]
@@ -1093,7 +1093,7 @@
       "word": "Wangsa",
       "meaning": "keturunan mulia",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "mulia"
       ]
@@ -1129,7 +1129,7 @@
       "word": "Wana",
       "meaning": "rimba",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "hutan"
       ]
@@ -1138,7 +1138,7 @@
       "word": "Sagara",
       "meaning": "samudra",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "laut"
       ]
@@ -1147,7 +1147,7 @@
       "word": "Baskara",
       "meaning": "matahari",
       "pos": "noun",
-      "gender": "uni",
+      "gender": "lk",
       "theme_tags": [
         "matahari"
       ]
