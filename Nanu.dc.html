@@ -156,11 +156,14 @@
   </main>
 
   <!-- ============ FOOTER ============ -->
-  <footer style="width:100%;padding:24px 20px 34px;text-align:center">
-    <button onClick="{{ openFeedback }}" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:#5C6B72;font-weight:600;font-size:13.5px;cursor:pointer" style-hover="color:#3CA274">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-      Beri masukan
-    </button>
+  <footer style="width:100%;padding:26px 20px 40px;text-align:center;border-top:1px solid #EDE2DC;margin-top:24px">
+    <div style="display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;justify-content:center;margin-bottom:12px">
+      <a href="/privasi" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Kebijakan Privasi</a>
+      <a href="/ketentuan" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Ketentuan Layanan</a>
+      <a href="/faq" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Tanya Jawab</a>
+      <button onClick="{{ openFeedback }}" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:#5C6B72;font-weight:600;font-size:13.5px;cursor:pointer;padding:0" style-hover="color:#3CA274">Beri masukan</button>
+    </div>
+    <div style="color:#A9B3B8;font-size:12.5px">© 2026 Nanu · inspirasinama.xyz</div>
   </footer>
 
   <!-- ============ FEEDBACK MODAL ============ -->

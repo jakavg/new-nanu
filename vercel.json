@@ -16,6 +16,9 @@
     { "source": "/Nanu.dc.html", "destination": "/", "permanent": true },
     { "source": "/Daftar-Nama.dc.html", "destination": "/daftar-nama", "permanent": true },
     { "source": "/Nama-Tersimpan.dc.html", "destination": "/nama-tersimpan", "permanent": true },
+    { "source": "/privasi.html", "destination": "/privasi", "permanent": true },
+    { "source": "/ketentuan.html", "destination": "/ketentuan", "permanent": true },
+    { "source": "/faq.html", "destination": "/faq", "permanent": true },
     {
       "source": "/((?!api/).*)",
       "has": [{ "type": "host", "value": "nanu-rust.vercel.app" }],
@@ -26,6 +29,9 @@
   "rewrites": [
     { "source": "/", "destination": "/Nanu.dc.html" },
     { "source": "/daftar-nama", "destination": "/Daftar-Nama.dc.html" },
-    { "source": "/nama-tersimpan", "destination": "/Nama-Tersimpan.dc.html" }
+    { "source": "/nama-tersimpan", "destination": "/Nama-Tersimpan.dc.html" },
+    { "source": "/privasi", "destination": "/privasi.html" },
+    { "source": "/ketentuan", "destination": "/ketentuan.html" },
+    { "source": "/faq", "destination": "/faq.html" }
   ]
 }
