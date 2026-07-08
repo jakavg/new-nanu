@@ -1,15 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daftar Nama · Nanu</title>
+<meta name="description" content="Rangkaian ide nama bayi bermakna dari Nanu, lengkap dengan artinya — pilih asal (Jawa Kuno, Sansekerta, Islami), jenis kelamin, dan panjang nama.">
+<link rel="canonical" href="https://inspirasinama.xyz/daftar-nama">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nanu">
+<meta property="og:title" content="Daftar Nama · Nanu">
+<meta property="og:description" content="Rangkaian ide nama bayi bermakna lengkap dengan artinya.">
+<meta property="og:url" content="https://inspirasinama.xyz/daftar-nama">
+<meta property="og:image" content="https://inspirasinama.xyz/assets/nanu-logo.png">
+<meta name="twitter:card" content="summary">
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
 <link rel="icon" type="image/svg+xml" href="/favicon-nanu.svg">
+<script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -364,7 +374,7 @@ class Component extends DCLogic {
   // Tangani hasil pembayaran saat pengguna kembali via redirect Midtrans (bukan popup).
   resumePaymentReturn(payReturn, premium) {
     this.setState({ showUpgrade: false });
-    if (premium) { this.showToast('Pembayaran berhasil · generate tak terbatas aktif'); return; }
+    if (premium) { this.track('purchase'); this.showToast('Pembayaran berhasil · generate tak terbatas aktif'); return; }
     const st = payReturn.status;
     if (st === 'settlement' || st === 'capture' || st === 'success') {
       // Webhook mungkin belum tuntas — polling status hingga premium aktif.
@@ -399,6 +409,9 @@ class Component extends DCLogic {
     this._t = setTimeout(() => this.setState({ toast: '' }), 2600);
   }
 
+  // Analytics event (Vercel Web Analytics) — aman kalau script belum termuat.
+  track(name) { try { if (window.va) window.va('event', { name }); } catch (e) {} }
+
   setField(k, v) { this.setState({ [k]: v }); }
   originLabel(id) { return { jawa: 'Jawa Kuno', sansekerta: 'Sansekerta', islami: 'Islami' }[id]; }
   originLang(id) { return { jawa: 'Jawa Kuno (Kawi)', sansekerta: 'Sansekerta', islami: 'Arab / Islami' }[id]; }
@@ -415,6 +428,7 @@ class Component extends DCLogic {
     // Gate anonim: batasi 2 generate gratis per-device (localStorage). Premium &
     // user login non-premium digate di server (jatah free_uses).
     if (!this.state.user && this.freeUsesLocal() >= 2) {
+      this.track('paywall_login');
       this.promptLogin('Lanjut cari nama?', 'Login gratis untuk membuat lebih banyak rangkaian nama.');
       return;
     }
@@ -425,6 +439,7 @@ class Component extends DCLogic {
       // Server: jatah gratis user login non-premium habis → tawarkan upgrade,
       // tapi tetap tampilkan list terakhir (jangan hilang saat modal ditutup).
       if (this._lastMeta && this._lastMeta.limit === 'free') {
+        this.track('paywall_upgrade');
         this.setState({ loading: false, showUpgrade: true, results: prevResults });
         return;
       }
@@ -444,7 +459,7 @@ class Component extends DCLogic {
   async loadMore() {
     if (this.state.loadingMore) return;
     if (!this.state.user) { this.promptLogin('Masuk untuk lihat nama lainnya', 'Login dulu untuk memuat lebih banyak pilihan nama.'); return; }
-    if (!this.state.premium) { this.setState({ showUpgrade: true }); return; }
+    if (!this.state.premium) { this.track('paywall_upgrade'); this.setState({ showUpgrade: true }); return; }
     const count = this.props.resultsCount ?? 5;
     const existing = this.state.results.map(r => r.name);
     this.setState({ loadingMore: true });
@@ -562,6 +577,7 @@ class Component extends DCLogic {
   async startPayment() {
     if (!this.state.user) { this.setState({ showUpgrade: false }); this.promptLogin('Masuk ke Nanu', 'Masuk dulu untuk melanjutkan pembayaran.'); return; }
     if (!window.snap) { this.showToast('Pembayaran belum siap, coba lagi sebentar'); return; }
+    this.track('checkout_start');
     this.setState({ paying: true });
     try {
       const token = this.state.accessToken || (this._sb && await this._sb.getAccessToken());
@@ -595,6 +611,7 @@ class Component extends DCLogic {
         const r = await fetch('/api/payment/status?order_id=' + encodeURIComponent(orderId), { headers: { Authorization: 'Bearer ' + token } });
         const d = await r.json();
         if (d.premium) {
+          this.track('purchase');
           this.setState({ premium: true });
           this.showToast('Pembayaran berhasil · generate tak terbatas aktif');
           return;

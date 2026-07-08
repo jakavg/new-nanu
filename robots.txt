@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /nama-tersimpan
+Disallow: /api/
+
+Sitemap: https://inspirasinama.xyz/sitemap.xml
