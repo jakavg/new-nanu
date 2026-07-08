@@ -11,13 +11,13 @@
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:#F9EFEB;color:#0B2A3A;line-height:1.65}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:#F9EFEB;color:#0B2A3A;line-height:1.65;min-height:100vh;display:flex;flex-direction:column}
   a{color:#185FA4;text-decoration:none}
   a:hover{text-decoration:underline}
   header{background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC;position:sticky;top:0;z-index:10}
   header .in{max-width:760px;margin:0 auto;padding:14px 22px}
   header img{height:34px;display:block}
-  main{max-width:760px;margin:0 auto;padding:36px 22px 20px}
+  main{max-width:760px;width:100%;margin:0 auto;padding:36px 22px 20px;flex:1}
   h1{font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(26px,5vw,36px);margin:0 0 6px;letter-spacing:-.01em}
   .updated{color:#8A969C;font-size:14px;margin:0 0 28px}
   h2{font-family:'Baloo 2',cursive;font-weight:700;font-size:20px;margin:30px 0 8px;color:#0B2A3A}
@@ -25,8 +25,8 @@
   ul{padding-left:20px}
   li{margin-bottom:6px}
   .card{background:#fff;border:1px solid #EDE2DC;border-radius:16px;padding:14px 18px;margin:14px 0}
-  footer{max-width:760px;margin:0 auto;padding:26px 22px 44px;border-top:1px solid #EDE2DC;margin-top:32px;color:#8A969C;font-size:13.5px}
-  footer nav{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px}
+  footer{max-width:760px;width:100%;margin:32px auto 0;padding:26px 22px 44px;border-top:1px solid #EDE2DC;color:#8A969C;font-size:13.5px;text-align:center}
+  footer nav{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px;justify-content:center}
   footer a{color:#5C6B72;font-weight:600}
 </style>
 </head>
@@ -40,34 +40,28 @@
 
   <h2>Data yang kami kumpulkan</h2>
   <ul>
-    <li><strong>Informasi akun Google</strong> (saat kamu login): nama, alamat email, dan foto profil. Kami menggunakan Google Sign-In melalui Supabase Auth.</li>
+    <li><strong>Informasi akun Google</strong> (saat kamu login dengan Google Sign-In): nama, alamat email, dan foto profil.</li>
     <li><strong>Nama yang kamu simpan</strong> ke koleksi favoritmu.</li>
     <li><strong>Masukan (feedback)</strong> yang kamu kirim, beserta email (opsional) bila kamu mencantumkannya.</li>
-    <li><strong>Data teknis terbatas</strong>: alamat IP dan tipe peramban (user agent), dipakai untuk keamanan dan mencegah penyalahgunaan.</li>
-    <li><strong>Pembayaran</strong>: diproses sepenuhnya oleh Midtrans. Kami <strong>tidak menyimpan</strong> nomor kartu, rekening, atau kredensial pembayaranmu — kami hanya menyimpan status transaksi (mis. lunas) untuk mengaktifkan fitur premium.</li>
+    <li><strong>Data teknis terbatas</strong>: alamat IP dan tipe peramban, dipakai untuk keamanan dan mencegah penyalahgunaan.</li>
+    <li><strong>Pembayaran</strong>: diproses oleh penyedia pembayaran tepercaya. Kami <strong>tidak menyimpan</strong> nomor kartu, rekening, atau kredensial pembayaranmu — kami hanya menyimpan status transaksi (mis. lunas) untuk mengaktifkan fitur premium.</li>
   </ul>
 
   <h2>Cara kami menggunakan data</h2>
   <ul>
     <li>Menyediakan layanan: login, menyimpan nama, dan membuka fitur premium.</li>
-    <li>Menjaga keamanan dan mencegah penyalahgunaan (mis. pembatasan laju permintaan).</li>
+    <li>Menjaga keamanan dan mencegah penyalahgunaan.</li>
     <li>Menanggapi masukan dan menghubungimu bila diperlukan.</li>
   </ul>
 
   <h2>Berbagi data dengan pihak ketiga</h2>
-  <p>Kami tidak menjual data pribadimu. Kami menggunakan penyedia layanan tepercaya berikut untuk menjalankan Nanu:</p>
-  <ul>
-    <li><strong>Google</strong> — autentikasi (login).</li>
-    <li><strong>Supabase</strong> — autentikasi dan penyimpanan data (akun, nama tersimpan, masukan).</li>
-    <li><strong>Midtrans</strong> — pemrosesan pembayaran.</li>
-    <li><strong>Vercel</strong> — hosting situs.</li>
-  </ul>
+  <p>Kami <strong>tidak menjual</strong> data pribadimu. Untuk menjalankan layanan, kami menggunakan penyedia tepercaya pihak ketiga — antara lain untuk login dengan Google, penyimpanan data, pemrosesan pembayaran, dan hosting. Mereka hanya memproses data seperlunya agar layanan berfungsi.</p>
 
-  <h2>Penyimpanan lokal (localStorage)</h2>
-  <p>Kami menyimpan sedikit data di peramban kamu (mis. sesi login dan hitungan pemakaian gratis) agar layanan berfungsi. Data ini tidak kami gunakan untuk pelacakan iklan.</p>
+  <h2>Penyimpanan lokal</h2>
+  <p>Kami menyimpan sedikit data di peramban kamu (mis. sesi login dan hitungan pemakaian gratis) agar layanan berfungsi. Data ini tidak digunakan untuk pelacakan iklan.</p>
 
   <h2>Penyimpanan &amp; keamanan</h2>
-  <p>Data disimpan di server Supabase dengan kontrol akses ketat (Row Level Security). Kunci rahasia tidak pernah disimpan di sisi peramban.</p>
+  <p>Data disimpan di server yang aman dengan kontrol akses ketat. Kredensial rahasia tidak pernah disimpan di sisi peramban.</p>
 
   <h2>Hak kamu</h2>
   <p>Kamu berhak meminta akses atau penghapusan data pribadimu (termasuk menghapus akun). Cukup hubungi kami di email di bawah, dan kami akan memprosesnya.</p>
@@ -76,7 +70,7 @@
   <p>Kami dapat memperbarui kebijakan ini sewaktu-waktu. Perubahan penting akan tercermin pada tanggal “Terakhir diperbarui” di atas.</p>
 
   <h2>Kontak</h2>
-  <div class="card">Ada pertanyaan tentang privasi? Hubungi kami di <a href="mailto:jakapermadi94@gmail.com">jakapermadi94@gmail.com</a>.</div>
+  <div class="card">Ada pertanyaan tentang privasi? Hubungi kami di <a href="mailto:nana.ninu.ku@gmail.com">nana.ninu.ku@gmail.com</a>.</div>
 </main>
 <footer>
   <nav>
@@ -85,7 +79,7 @@
     <a href="/ketentuan">Ketentuan Layanan</a>
     <a href="/faq">Tanya Jawab</a>
   </nav>
-  © 2026 Nanu · inspirasinama.xyz
+  © 2026 Nanu · Made with ❤️
 </footer>
 </body>
 </html>
