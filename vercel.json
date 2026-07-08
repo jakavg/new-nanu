@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/((?!api/).*)",
+      "has": [{ "type": "host", "value": "nanu-rust.vercel.app" }],
+      "destination": "https://inspirasinama.xyz/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/Nanu.dc.html" },
     { "source": "/daftar-nama", "destination": "/Daftar-Nama.dc.html" },
