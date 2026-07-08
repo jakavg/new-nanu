@@ -1,5 +1,8 @@
 {
   "redirects": [
+    { "source": "/Nanu.dc.html", "destination": "/", "permanent": true },
+    { "source": "/Daftar-Nama.dc.html", "destination": "/daftar-nama", "permanent": true },
+    { "source": "/Nama-Tersimpan.dc.html", "destination": "/nama-tersimpan", "permanent": true },
     {
       "source": "/((?!api/).*)",
       "has": [{ "type": "host", "value": "nanu-rust.vercel.app" }],

@@ -32,7 +32,7 @@
   <!-- ============ HEADER ============ -->
   <header style="position:sticky;top:0;z-index:40;background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC">
     <div style="max-width:880px;width:100%;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
-      <a href="Nanu.dc.html" title="Beranda" style="display:flex;align-items:center;text-decoration:none">
+      <a href="/" title="Beranda" style="display:flex;align-items:center;text-decoration:none">
         <img src="assets/nanu-logo.png" alt="Nanu" style="height:42px;width:auto;display:block">
       </a>
       <nav style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -81,7 +81,7 @@
 
   <main style="flex:1;width:100%">
     <div style="max-width:720px;width:100%;margin:0 auto;padding:26px 20px 0">
-      <a href="Nanu.dc.html" style="color:#5C6B72;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;text-decoration:none">
+      <a href="/" style="color:#5C6B72;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;text-decoration:none">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
         Ubah pencarian
       </a>
@@ -578,7 +578,7 @@ class Component extends DCLogic {
   }
 
   goSaved() {
-    if (this.state.user) { window.location.href = 'Nama-Tersimpan.dc.html'; return; }
+    if (this.state.user) { window.location.href = '/nama-tersimpan'; return; }
     this.promptLogin('Masuk untuk lihat nama tersimpan', 'Koleksi nama favoritmu tersimpan aman di akunmu.');
   }
 
@@ -601,7 +601,7 @@ class Component extends DCLogic {
       const resp = await fetch('/api/feedback', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ message: msg, email: (this.state.fbEmail || '').trim(), page: 'Daftar-Nama.dc.html', hp: this.state.fbHp || '' }),
+        body: JSON.stringify({ message: msg, email: (this.state.fbEmail || '').trim(), page: 'daftar-nama', hp: this.state.fbHp || '' }),
       });
       if (!resp.ok) throw new Error('fail');
       this.setState({ showFeedback: false, fbSending: false, fbMsg: '', fbEmail: '' });
