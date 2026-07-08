@@ -613,8 +613,8 @@ class Component extends DCLogic {
 
   shareTo(channel) {
     const it = this.state.shareTarget; if (!it) return;
-    // Teks tunggal yang dibagikan: "Nama — Arti (Via nanu-rust.vercel.app)".
-    const text = it.name + ' — ' + it.meaning + ' (Via nanu-rust.vercel.app)';
+    // Teks tunggal yang dibagikan: "Nama — Arti (Via inspirasinama.xyz)".
+    const text = it.name + ' — ' + it.meaning + ' (Via inspirasinama.xyz)';
     const copy = () => { try { if (navigator.clipboard) navigator.clipboard.writeText(text); } catch (e) {} };
     try {
       // WhatsApp bisa pre-fill teks lewat wa.me — buka aplikasinya.
