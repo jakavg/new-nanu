@@ -2,9 +2,11 @@
 // Insert lewat service-role agar tabel tetap terkunci (RLS tanpa policy publik).
 // user_id diambil dari token sesi (bila login) supaya tidak bisa dipalsukan client.
 const { createClient } = require('@supabase/supabase-js');
+const { allow } = require('./_ratelimit');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+  if (!(await allow(req, 'feedback'))) { res.status(429).json({ error: 'Terlalu banyak kiriman, coba lagi nanti ya.' }); return; }
 
   const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {

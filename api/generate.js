@@ -3,6 +3,7 @@
 // pemanggilan AI/Claude sama sekali. Bila kata kunci tak menemukan hasil, kata
 // kunci dilonggarkan (diabaikan) agar user tetap mendapat nama asli dari bank.
 const { createClient } = require('@supabase/supabase-js');
+const { allow } = require('./_ratelimit');
 
 // Jatah generate gratis untuk user LOGIN non-premium (lifetime, dihitung server).
 // Anonim dibatasi di client via localStorage (lihat Daftar-Nama.dc.html).
@@ -51,6 +52,10 @@ async function serveFromBank(supabase, { origin, gender, length, keyword, count,
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+  if (!(await allow(req, 'generate'))) {
+    res.status(429).json({ error: 'Terlalu banyak permintaan, coba lagi sebentar ya.' });
     return;
   }
 
