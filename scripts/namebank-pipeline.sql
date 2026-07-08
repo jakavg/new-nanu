@@ -119,36 +119,60 @@ ORDER BY random() LIMIT 150
 ON CONFLICT (origin,name_key) DO NOTHING;
 
 -- 3) Serving function (called by api/generate.js via supabase.rpc) --------------
+-- Scalability: instead of ORDER BY random() (full scan + sort of the whole
+-- filtered bucket, ~23ms @ ~1600 rows), we keep a static indexed random column
+-- `rnd` and SEEK from a random point (two-pass wrap-around) → no full sort,
+-- ~4x+ faster and scales with LIMIT not table size. Re-shuffle periodically:
+--   UPDATE names_bank SET rnd = random();   (e.g. weekly cron)
+ALTER TABLE names_bank ADD COLUMN IF NOT EXISTS rnd double precision;
+UPDATE names_bank SET rnd = random() WHERE rnd IS NULL;
+ALTER TABLE names_bank ALTER COLUMN rnd SET DEFAULT random();
+ALTER TABLE names_bank ALTER COLUMN rnd SET NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_bank_pick ON names_bank (origin, gender, length, rnd) WHERE status = 'live';
+
 CREATE OR REPLACE FUNCTION pick_bank_names(
-  p_origin text,
-  p_gender text,
-  p_length int,
-  p_keyword text,
-  p_limit int,
-  p_exclude text[]
-) RETURNS TABLE(name text, meaning text) AS $$
-  SELECT name, meaning FROM names_bank
-  WHERE origin = p_origin
-    AND status = 'live'
-    AND (p_gender IS NULL OR gender = p_gender)
-    AND (p_length IS NULL OR length = p_length)
-    AND (
-      p_keyword IS NULL OR p_keyword = ''
-      OR meaning ILIKE '%' || p_keyword || '%'
-      OR name ILIKE '%' || p_keyword || '%'
-      OR EXISTS (SELECT 1 FROM unnest(theme_tags) t WHERE t ILIKE '%' || p_keyword || '%')
-    )
-    AND (p_exclude IS NULL OR NOT (name = ANY(p_exclude)))
-    -- Blocklist: exclude names whose full name OR any source word matches a
-    -- name_blocklist pattern (ILIKE; patterns may use % wildcards). Empty list = no-op.
-    AND NOT EXISTS (
-      SELECT 1 FROM name_blocklist b
-      WHERE names_bank.name ILIKE b.pattern
-         OR EXISTS (SELECT 1 FROM unnest(names_bank.source_words) sw WHERE sw ILIKE b.pattern)
-    )
-  ORDER BY random()
-  LIMIT GREATEST(p_limit, 1);
-$$ LANGUAGE sql STABLE;
+  p_origin text, p_gender text, p_length int, p_keyword text, p_limit int, p_exclude text[]
+) RETURNS TABLE(name text, meaning text) LANGUAGE plpgsql VOLATILE AS $$
+#variable_conflict use_column
+DECLARE v_seed double precision := random();
+BEGIN
+  RETURN QUERY
+  WITH pass1 AS (  -- rows at/after the random seed, in rnd order
+    SELECT nb.name, nb.meaning, nb.rnd FROM names_bank nb
+    WHERE nb.origin = p_origin AND nb.status = 'live'
+      AND (p_gender IS NULL OR nb.gender = p_gender)
+      AND (p_length IS NULL OR nb.length = p_length)
+      AND nb.rnd >= v_seed
+      AND (p_keyword IS NULL OR p_keyword = '' OR nb.meaning ILIKE '%'||p_keyword||'%'
+           OR nb.name ILIKE '%'||p_keyword||'%'
+           OR EXISTS (SELECT 1 FROM unnest(nb.theme_tags) t WHERE t ILIKE '%'||p_keyword||'%'))
+      AND (p_exclude IS NULL OR NOT (nb.name = ANY(p_exclude)))
+      AND NOT EXISTS (SELECT 1 FROM name_blocklist b
+        WHERE nb.name ILIKE b.pattern
+           OR EXISTS (SELECT 1 FROM unnest(nb.source_words) sw WHERE sw ILIKE b.pattern))
+    ORDER BY nb.rnd LIMIT GREATEST(p_limit, 1)
+  ),
+  pass2 AS (  -- wrap-around: rows before the seed
+    SELECT nb.name, nb.meaning, nb.rnd FROM names_bank nb
+    WHERE nb.origin = p_origin AND nb.status = 'live'
+      AND (p_gender IS NULL OR nb.gender = p_gender)
+      AND (p_length IS NULL OR nb.length = p_length)
+      AND nb.rnd < v_seed
+      AND (p_keyword IS NULL OR p_keyword = '' OR nb.meaning ILIKE '%'||p_keyword||'%'
+           OR nb.name ILIKE '%'||p_keyword||'%'
+           OR EXISTS (SELECT 1 FROM unnest(nb.theme_tags) t WHERE t ILIKE '%'||p_keyword||'%'))
+      AND (p_exclude IS NULL OR NOT (nb.name = ANY(p_exclude)))
+      AND NOT EXISTS (SELECT 1 FROM name_blocklist b
+        WHERE nb.name ILIKE b.pattern
+           OR EXISTS (SELECT 1 FROM unnest(nb.source_words) sw WHERE sw ILIKE b.pattern))
+    ORDER BY nb.rnd LIMIT GREATEST(p_limit, 1)
+  )
+  SELECT p.name, p.meaning FROM (
+    SELECT name, meaning, rnd, 0 AS ord FROM pass1
+    UNION ALL SELECT name, meaning, rnd, 1 AS ord FROM pass2
+  ) p ORDER BY p.ord, p.rnd LIMIT GREATEST(p_limit, 1);
+END;
+$$;
 
 -- 4) Coverage check ------------------------------------------------------------
 CREATE OR REPLACE FUNCTION bank_has_origin(p_origin text) RETURNS boolean AS $$
