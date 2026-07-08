@@ -1,43 +1,46 @@
-// Rate limiter bersama (Upstash Redis) untuk endpoint publik.
-// FAIL-OPEN: bila env Upstash belum ada / Redis error → tidak memblokir
-// (endpoint tetap jalan). File diawali '_' → tidak jadi route Vercel.
-let _limiters = null;
-let _init = false;
+// Rate limiter bersama (Redis TCP via REDIS_URL, mis. Redis Cloud/Vercel).
+// FAIL-OPEN: bila REDIS_URL tak ada / Redis error → tidak memblokir.
+// File diawali '_' → tidak jadi route Vercel.
+let _redis = null; // null = belum coba, false = tak tersedia
 
-function getLimiters() {
-  if (_init) return _limiters;
-  _init = true;
-  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-  if (!url || !token) return (_limiters = null); // belum dikonfigurasi → skip
+function getRedis() {
+  if (_redis !== null) return _redis;
+  const url = process.env.REDIS_URL;
+  if (!url) return (_redis = false);
   try {
-    const { Ratelimit } = require('@upstash/ratelimit');
-    const { Redis } = require('@upstash/redis');
-    const redis = new Redis({ url, token });
-    _limiters = {
-      // main UX — longgar, cukup buat blokir bot yang hammer
-      generate: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '10 s'), prefix: 'rl:gen' }),
-      feedback: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, '1 h'), prefix: 'rl:fb' }),
-      payment: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '1 h'), prefix: 'rl:pay' }),
-    };
+    const IORedis = require('ioredis');
+    _redis = new IORedis(url, {
+      maxRetriesPerRequest: 2,
+      connectTimeout: 3000,
+      enableOfflineQueue: true,
+    });
+    _redis.on('error', () => {}); // jangan biarkan error koneksi meng-crash function
   } catch (e) {
-    _limiters = null;
+    _redis = false;
   }
-  return _limiters;
+  return _redis;
 }
+
+// [max request, window detik] per IP
+const LIMITS = { generate: [30, 10], feedback: [5, 3600], payment: [10, 3600] };
 
 function clientIp(req) {
   const xff = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
   return xff || req.headers['x-real-ip'] || 'unknown';
 }
 
-// Panggil di awal handler. Return true = boleh lanjut, false = kena limit (429).
+// Fixed-window counter: INCR + EXPIRE. Return true = boleh, false = kena limit.
 async function allow(req, which) {
-  const rl = getLimiters();
-  if (!rl || !rl[which]) return true; // fail-open
+  const r = getRedis();
+  const cfg = LIMITS[which];
+  if (!r || !cfg) return true; // fail-open
+  const [max, win] = cfg;
+  const bucket = Math.floor(Date.now() / 1000 / win);
+  const key = `rl:${which}:${clientIp(req)}:${bucket}`;
   try {
-    const { success } = await rl[which].limit(clientIp(req));
-    return success;
+    const count = await r.incr(key);
+    if (count === 1) await r.expire(key, win);
+    return count <= max;
   } catch (e) {
     return true; // Redis error → jangan hukum user
   }
