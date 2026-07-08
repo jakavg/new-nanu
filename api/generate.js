@@ -4,6 +4,10 @@
 // kunci dilonggarkan (diabaikan) agar user tetap mendapat nama asli dari bank.
 const { createClient } = require('@supabase/supabase-js');
 
+// Jatah generate gratis untuk user LOGIN non-premium (lifetime, dihitung server).
+// Anonim dibatasi di client via localStorage (lihat Daftar-Nama.dc.html).
+const FREE_LIMIT = 5;
+
 function getServiceClient() {
   const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return null;
@@ -70,10 +74,28 @@ module.exports = async (req, res) => {
   const supabase = getServiceClient();
   if (!supabase) { res.status(500).json({ error: 'Server belum dikonfigurasi.' }); return; }
 
-  // Batch pertama gratis; "Muat lebih banyak" butuh premium.
+  // "Muat lebih banyak" butuh premium.
   if (mode === 'more') {
     const gate = await requirePremium(req, supabase);
     if (!gate.ok) { res.status(gate.code).json({ error: gate.error }); return; }
+  } else {
+    // mode 'initial': user LOGIN non-premium dibatasi FREE_LIMIT (dihitung server,
+    // tak bisa di-bypass clear storage). Anonim → dilewati (dibatasi client via
+    // localStorage). Premium → unlimited.
+    const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
+    if (token) {
+      try {
+        const { data: ures } = await supabase.auth.getUser(token);
+        const user = ures && ures.user;
+        if (user) {
+          const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
+          if (!(prof && prof.is_premium)) {
+            const { data: allowed } = await supabase.rpc('consume_free_use', { p_uid: user.id, p_limit: FREE_LIMIT });
+            if (allowed !== true) { res.status(200).json({ text: '[]', source: 'bank', limit: 'free' }); return; }
+          }
+        }
+      } catch (e) { /* token invalid → perlakukan sebagai anonim, lanjut */ }
+    }
   }
 
   try {

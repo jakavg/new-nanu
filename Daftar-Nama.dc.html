@@ -324,7 +324,9 @@ class Component extends DCLogic {
     const payReturn = q.get('order_id') ? { orderId: q.get('order_id'), status: (q.get('transaction_status') || '').toLowerCase() } : null;
     if (payReturn) this.cleanPaymentParams();
 
-    this.setState({ origin, length, gender, keyword }, () => this.generate());
+    // generate() dipanggil oleh initAuth SETELAH status auth diketahui, supaya
+    // user login mengirim token (dihitung server) & tidak salah kena gate anonim.
+    this.setState({ origin, length, gender, keyword });
     this.initAuth(payReturn);
   }
 
@@ -344,12 +346,20 @@ class Component extends DCLogic {
         const user = await m.getUser();
         if (user) {
           const [premium, token, saved] = await Promise.all([m.isPremium(), m.getAccessToken(), m.fetchSaved()]);
-          this.setState({ user, premium, accessToken: token, saved });
-          if (payReturn) this.resumePaymentReturn(payReturn, premium);
+          this.setState({ user, premium, accessToken: token, saved }, () => {
+            if (payReturn) this.resumePaymentReturn(payReturn, premium);
+            this.generate();
+          });
+          return;
         }
       } catch (e) {}
-    }).catch(() => {});
+      this.generate(); // anonim (atau auth gagal) — gate anonim via localStorage
+    }).catch(() => { this.generate(); });
   }
+
+  // ===== Jatah generate gratis anonim (per-device, localStorage) =====
+  freeUsesLocal() { try { return parseInt(localStorage.getItem('nanu_free_uses') || '0', 10) || 0; } catch (e) { return 0; } }
+  incFreeUsesLocal() { try { localStorage.setItem('nanu_free_uses', String(this.freeUsesLocal() + 1)); } catch (e) {} }
 
   // Tangani hasil pembayaran saat pengguna kembali via redirect Midtrans (bukan popup).
   resumePaymentReturn(payReturn, premium) {
@@ -402,15 +412,27 @@ class Component extends DCLogic {
 
   async generate() {
     const count = this.props.resultsCount ?? 5;
+    // Gate anonim: batasi 2 generate gratis per-device (localStorage). Premium &
+    // user login non-premium digate di server (jatah free_uses).
+    if (!this.state.user && this.freeUsesLocal() >= 2) {
+      this.promptLogin('Lanjut cari nama?', 'Login gratis untuk membuat lebih banyak rangkaian nama.');
+      return;
+    }
     this.setState({ loading: true, error: '', results: [] });
     try {
       const raw = await this.ai('', 'initial', { count, exclude: [] });
+      // Server: jatah gratis user login non-premium habis → tawarkan upgrade.
+      if (this._lastMeta && this._lastMeta.limit === 'free') {
+        this.setState({ loading: false, showUpgrade: true });
+        return;
+      }
       const data = this.parse(raw);
       if (!data.length) {
         this.setState({ loading: false, error: 'Belum ada nama yang cocok untuk pilihan ini. Coba ubah filter ya.' });
         return;
       }
       this.setState({ results: data, loading: false });
+      if (!this.state.user) this.incFreeUsesLocal();
       this.relaxToast();
     } catch (e) {
       this.setState({ loading: false, error: 'Gagal membuat nama. Periksa koneksi lalu coba lagi ya.' });
@@ -448,7 +470,9 @@ class Component extends DCLogic {
     // (API key tetap aman di server). Kirim juga filter terstruktur agar server
     // bisa query bank. Untuk mode 'more' kirim token sesi untuk cek premium.
     const headers = { 'Content-Type': 'application/json' };
-    if (mode === 'more' && this.state.accessToken) headers.Authorization = 'Bearer ' + this.state.accessToken;
+    // Kirim token untuk SEMUA mode: 'more' butuh cek premium; 'initial' butuh
+    // hitung jatah gratis user login non-premium di server.
+    if (this.state.accessToken) headers.Authorization = 'Bearer ' + this.state.accessToken;
     const resp = await fetch('/api/generate', {
       method: 'POST',
       headers,
@@ -468,7 +492,7 @@ class Component extends DCLogic {
     const data = await resp.json();
     // Simpan meta: bila server melonggarkan kata kunci (tak ada yang cocok),
     // kita beri tahu user lewat toast bahwa nama lain ditampilkan.
-    this._lastMeta = { relaxed: !!data.relaxed, keyword: data.keyword || '' };
+    this._lastMeta = { relaxed: !!data.relaxed, keyword: data.keyword || '', limit: data.limit || null };
     return data.text || '';
   }
 
