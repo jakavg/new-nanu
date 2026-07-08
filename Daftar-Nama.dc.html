@@ -418,12 +418,14 @@ class Component extends DCLogic {
       this.promptLogin('Lanjut cari nama?', 'Login gratis untuk membuat lebih banyak rangkaian nama.');
       return;
     }
+    const prevResults = this.state.results; // simpan agar bisa dipulihkan bila jatah habis
     this.setState({ loading: true, error: '', results: [] });
     try {
       const raw = await this.ai('', 'initial', { count, exclude: [] });
-      // Server: jatah gratis user login non-premium habis → tawarkan upgrade.
+      // Server: jatah gratis user login non-premium habis → tawarkan upgrade,
+      // tapi tetap tampilkan list terakhir (jangan hilang saat modal ditutup).
       if (this._lastMeta && this._lastMeta.limit === 'free') {
-        this.setState({ loading: false, showUpgrade: true });
+        this.setState({ loading: false, showUpgrade: true, results: prevResults });
         return;
       }
       const data = this.parse(raw);
