@@ -142,7 +142,9 @@
     '.nnu-copy{color:#A9B3B8;font-size:12.5px}',
     '.nnu-ovl{position:fixed;inset:0;z-index:70;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px}',
     '.nnu-modal{background:#fff;border-radius:26px;max-width:400px;width:100%;padding:30px;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)}',
-    '.nnu-modal h3{font-family:"Baloo 2",cursive;font-weight:700;font-size:22px;margin:0 0 6px;color:#0B2A3A}',
+    // line-height eksplisit: halaman legal memakai 1.65 pada body dan judul modal ikut renggang.
+    '.nnu-modal h3{font-family:"Baloo 2",cursive;font-weight:700;font-size:22px;line-height:1.25;margin:0 0 6px;color:#0B2A3A}',
+    '.nnu-modal p{line-height:1.55}',
     '.nnu-modal p{color:#5C6B72;font-size:14px;margin:0 0 18px}',
     '.nnu-modal textarea,.nnu-modal input{width:100%;box-sizing:border-box;border:2px solid #EDE2DC;border-radius:14px;padding:12px 14px;font-family:inherit;font-size:14.5px;color:#0B2A3A;outline:none}',
     '.nnu-modal textarea:focus,.nnu-modal input:focus{border-color:#3CA274}',
