@@ -205,6 +205,18 @@
     </div>
   </main>
 
+  <!-- ============ FOOTER ============ -->
+  <footer style="width:100%;padding:26px 20px 40px;text-align:center;border-top:1px solid #EDE2DC">
+    <div style="display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;justify-content:center;margin-bottom:12px">
+      <a href="/" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Beranda</a>
+      <a href="/privasi" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Kebijakan Privasi</a>
+      <a href="/ketentuan" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Ketentuan Layanan</a>
+      <a href="/faq" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Tanya Jawab</a>
+      <button onClick="{{ openFeedback }}" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:#5C6B72;font-weight:600;font-size:13.5px;cursor:pointer;padding:0" style-hover="color:#3CA274">Beri masukan</button>
+    </div>
+    <div style="color:#A9B3B8;font-size:12.5px">© 2026 Nanu · Made with ❤️</div>
+  </footer>
+
   <!-- ============ LOGIN MODAL ============ -->
   <sc-if value="{{ showLogin }}">
     <div onClick="{{ closeLogin }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
