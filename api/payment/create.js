@@ -4,7 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 const midtransClient = require('midtrans-client');
 const { allow } = require('../_ratelimit');
 
-const PRICE = 1000; // SEMENTARA: uji pembayaran. Normal = 30000. gross_amount harus integer IDR
+const PRICE = 30000; // Rp 30.000 — gross_amount harus integer IDR
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
