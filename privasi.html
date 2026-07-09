@@ -7,6 +7,7 @@
 <meta name="description" content="Kebijakan Privasi Nanu — bagaimana kami mengakses, menggunakan, menyimpan, dan melindungi datamu, termasuk data akun Google.">
 <link rel="icon" type="image/svg+xml" href="/favicon-nanu.svg">
 <script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/nanu-chrome.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,9 +17,6 @@
   body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:#F9EFEB;color:#0B2A3A;line-height:1.65;min-height:100vh;display:flex;flex-direction:column}
   a{color:#185FA4;text-decoration:none}
   a:hover{text-decoration:underline}
-  header{background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC;position:sticky;top:0;z-index:10}
-  header .in{max-width:760px;margin:0 auto;padding:14px 22px}
-  header img{height:34px;display:block}
   main{max-width:760px;width:100%;margin:0 auto;padding:36px 22px 20px;flex:1}
   h1{font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(26px,5vw,36px);margin:0 0 6px;letter-spacing:-.01em}
   .updated{color:#8A969C;font-size:14px;margin:0 0 28px}
@@ -27,13 +25,10 @@
   ul{padding-left:20px}
   li{margin-bottom:6px}
   .card{background:#fff;border:1px solid #EDE2DC;border-radius:16px;padding:14px 18px;margin:14px 0}
-  footer{max-width:760px;width:100%;margin:32px auto 0;padding:26px 22px 44px;border-top:1px solid #EDE2DC;color:#8A969C;font-size:13.5px;text-align:center}
-  footer nav{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px;justify-content:center}
-  footer a{color:#5C6B72;font-weight:600}
 </style>
 </head>
 <body>
-<header><div class="in"><a href="/" title="Beranda Nanu"><img src="/assets/nanu-logo.png" alt="Nanu"></a></div></header>
+<nanu-navbar></nanu-navbar>
 <main>
   <h1>Kebijakan Privasi</h1>
   <p class="updated">Terakhir diperbarui: 9 Juli 2026</p>
@@ -90,14 +85,11 @@
   <h2>Kontak</h2>
   <div class="card">Ada pertanyaan tentang privasi, atau ingin menghapus data? Hubungi kami di <a href="mailto:nana.ninu.ku@gmail.com">nana.ninu.ku@gmail.com</a>.</div>
 </main>
-<footer>
-  <nav>
-    <a href="/">Beranda</a>
-    <a href="/privasi">Kebijakan Privasi</a>
-    <a href="/ketentuan">Ketentuan Layanan</a>
-    <a href="/faq">Tanya Jawab</a>
-  </nav>
-  © 2026 Nanu · Made with ❤️
-</footer>
+<nanu-footer>
+  <a href="/">Beranda</a>
+  <a href="/privasi">Kebijakan Privasi</a>
+  <a href="/ketentuan">Ketentuan Layanan</a>
+  <a href="/faq">Tanya Jawab</a>
+</nanu-footer>
 </body>
 </html>

@@ -12,8 +12,10 @@
 <meta property="og:title" content="Nama Tersimpan · Nanu">
 <meta property="og:image" content="https://inspirasinama.xyz/assets/nanu-logo.png">
 <script src="./support.js"></script>
+<script defer src="/nanu-chrome.js"></script>
 </head>
 <body>
+<nanu-navbar></nanu-navbar>
 <x-dc>
 <helmet>
 <link rel="icon" type="image/svg+xml" href="/favicon-nanu.svg">
@@ -34,52 +36,7 @@
 </style>
 </helmet>
 
-<div style="min-height:100vh;display:flex;flex-direction:column;background:#F9EFEB">
-
-  <!-- ============ HEADER ============ -->
-  <header style="position:sticky;top:0;z-index:40;background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC">
-    <div style="max-width:880px;width:100%;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
-      <a href="/" title="Beranda" style="display:flex;align-items:center;text-decoration:none">
-        <img src="assets/nanu-logo.png" alt="Nanu" style="height:42px;width:auto;display:block">
-      </a>
-      <nav style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <a href="/" style="font-weight:600;font-size:14px;color:#0B2A3A;padding:8px 12px;border-radius:10px;text-decoration:none">Cari nama</a>
-        <sc-if value="{{ noUser }}" hint-placeholder-val="{{ true }}">
-          <button onClick="{{ openLogin }}" style="background:#0B2A3A;border:none;cursor:pointer;font-weight:600;font-size:14px;color:#fff;padding:9px 18px;border-radius:999px">Masuk</button>
-        </sc-if>
-        <sc-if value="{{ hasUser }}">
-          <div onMouseEnter="{{ openMenu }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
-            <button onClick="{{ toggleMenu }}" title="{{ userName }}" style="background:none;border:none;cursor:pointer;padding:0;display:flex;border-radius:50%">
-              <sc-if value="{{ hasAvatar }}" hint-placeholder-val="{{ false }}"><div style="{{ avatarStyle }}"></div></sc-if>
-              <sc-if value="{{ noAvatar }}" hint-placeholder-val="{{ true }}"><div style="width:34px;height:34px;border-radius:50%;background:#3CA274;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Baloo 2',cursive;font-size:16px">{{ userInitial }}</div></sc-if>
-            </button>
-            <sc-if value="{{ menuOpen }}">
-              <div style="position:absolute;top:34px;right:0;padding-top:10px;z-index:55">
-                <div style="background:#fff;border:1px solid #EDE2DC;border-radius:16px;box-shadow:0 18px 44px -16px rgba(11,42,58,.4);padding:15px;min-width:230px">
-                  <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
-                    <sc-if value="{{ hasAvatar }}" hint-placeholder-val="{{ false }}"><div style="{{ avatarStyle }}"></div></sc-if>
-                    <sc-if value="{{ noAvatar }}" hint-placeholder-val="{{ true }}"><div style="width:38px;height:38px;border-radius:50%;background:#3CA274;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Baloo 2',cursive;font-size:17px;flex:0 0 auto">{{ userInitial }}</div></sc-if>
-                    <div style="min-width:0">
-                      <div style="font-weight:700;font-size:14px;color:#0B2A3A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ userName }}</div>
-                      <div style="font-size:12.5px;color:#8A969C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ userEmail }}</div>
-                    </div>
-                  </div>
-                  <button onClick="{{ openFeedback }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid #EDE2DC;border-radius:10px;padding:10px;font-weight:700;font-size:13.5px;color:#0B2A3A;cursor:pointer;margin-bottom:8px" style-hover="border-color:#3CA274;color:#3CA274">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Beri masukan
-                  </button>
-                  <button onClick="{{ logout }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#F9EFEB;border:1px solid #EDE2DC;border-radius:10px;padding:10px;font-weight:700;font-size:13.5px;color:#EE5B3A;cursor:pointer" style-hover="background:#FDEAE4;border-color:#EE5B3A">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
-                    Keluar
-                  </button>
-                </div>
-              </div>
-            </sc-if>
-          </div>
-        </sc-if>
-      </nav>
-    </div>
-  </header>
+<div style="display:flex;flex-direction:column;flex:1">
 
   <main style="flex:1;width:100%">
     <div style="max-width:720px;width:100%;margin:0 auto;padding:36px 20px 90px">
@@ -135,18 +92,6 @@
     </div>
   </main>
 
-  <!-- ============ FOOTER ============ -->
-  <footer style="width:100%;padding:26px 20px 40px;text-align:center;border-top:1px solid #EDE2DC">
-    <div style="display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;justify-content:center;margin-bottom:12px">
-      <a href="/" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Beranda</a>
-      <a href="/privasi" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Kebijakan Privasi</a>
-      <a href="/ketentuan" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Ketentuan Layanan</a>
-      <a href="/faq" style="color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none">Tanya Jawab</a>
-      <button onClick="{{ openFeedback }}" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:#5C6B72;font-weight:600;font-size:13.5px;cursor:pointer;padding:0" style-hover="color:#3CA274">Beri masukan</button>
-    </div>
-    <div style="color:#A9B3B8;font-size:12.5px">© 2026 Nanu · Made with ❤️</div>
-  </footer>
-
   <!-- ============ LOGIN MODAL ============ -->
   <sc-if value="{{ showLogin }}">
     <div onClick="{{ closeLogin }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
@@ -195,27 +140,6 @@
     </div>
   </sc-if>
 
-  <!-- ============ FEEDBACK MODAL ============ -->
-  <sc-if value="{{ showFeedback }}">
-    <div onClick="{{ closeFeedback }}" style="position:fixed;inset:0;z-index:70;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
-      <div onClick="{{ stop }}" style="background:#fff;border-radius:26px;max-width:420px;width:100%;padding:30px 26px;animation:nanuPop .28s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)">
-        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:22px;margin:0 0 6px;color:#0B2A3A">Beri masukan</h3>
-        <p style="color:#5C6B72;font-size:14px;line-height:1.5;margin:0 0 18px">Kritik, saran, atau laporan bug — semua membantu Nanu jadi lebih baik.</p>
-        <textarea value="{{ fbMsg }}" onChange="{{ onFbMsg }}" placeholder="Tulis masukanmu di sini…" style="width:100%;min-height:112px;resize:vertical;padding:13px 14px;border:2px solid #EDE2DC;border-radius:14px;font-size:15px;color:#0B2A3A;outline:none;background:#FCF7F4;font-family:inherit;line-height:1.5;box-sizing:border-box" style-focus="border-color:#3CA274;background:#fff"></textarea>
-        <sc-if value="{{ fbShowEmail }}">
-          <input value="{{ fbEmail }}" onChange="{{ onFbEmail }}" placeholder="Email (opsional, jika ingin dibalas)" style="width:100%;margin-top:10px;padding:12px 14px;border:2px solid #EDE2DC;border-radius:13px;font-size:14.5px;color:#0B2A3A;outline:none;background:#FCF7F4;box-sizing:border-box" style-focus="border-color:#3CA274;background:#fff">
-        </sc-if>
-        <input value="{{ fbHp }}" onChange="{{ onFbHp }}" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-        <div style="display:flex;gap:10px;margin-top:18px">
-          <button onClick="{{ closeFeedback }}" style="flex:0 0 auto;background:#F9EFEB;border:1px solid #EDE2DC;border-radius:13px;padding:12px 18px;font-weight:700;font-size:14.5px;color:#5C6B72;cursor:pointer">Batal</button>
-          <button onClick="{{ submitFeedback }}" style="flex:1;background:#EE5B3A;border:none;color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;padding:12px;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="filter:brightness(1.05)">
-            <sc-if value="{{ fbSending }}"><span style="width:16px;height:16px;border:2.5px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:nanuSpin .8s linear infinite"></span>Mengirim…</sc-if>
-            <sc-if value="{{ fbNotSending }}">Kirim masukan</sc-if>
-          </button>
-        </div>
-      </div>
-    </div>
-  </sc-if>
 
   <!-- ============ TOAST ============ -->
   <sc-if value="{{ hasToast }}">
@@ -224,12 +148,28 @@
 
 </div>
 </x-dc>
+<nanu-footer>
+  <a href="/">Beranda</a>
+  <a href="/privasi">Kebijakan Privasi</a>
+  <a href="/ketentuan">Ketentuan Layanan</a>
+  <a href="/faq">Tanya Jawab</a>
+</nanu-footer>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:640}}">
 class Component extends DCLogic {
-  state = { saved: [], user: null, showLogin: false, shareTarget: null, toast: '', menuOpen: false, loadingAuth: true, showFeedback: false, fbMsg: '', fbEmail: '', fbHp: '', fbSending: false };
+  state = { saved: [], user: null, showLogin: false, shareTarget: null, toast: '', loadingAuth: true };
 
   componentDidMount() {
+    // Navbar bersama (nanu-chrome.js) minta login → buka modal milik halaman ini.
+    this._onLogin = (e) => { e.preventDefault(); this.openLogin(); };
+    document.addEventListener('nanu:login', this._onLogin);
     this.initAuth();
+  }
+
+  componentWillUnmount() { document.removeEventListener('nanu:login', this._onLogin); }
+
+  // Beri tahu navbar bersama supaya badge "Tersimpan" ikut ter-update.
+  syncSaved(saved) {
+    document.dispatchEvent(new CustomEvent('nanu:saved', { detail: { count: saved.length } }));
   }
 
   initAuth() {
@@ -240,6 +180,7 @@ class Component extends DCLogic {
         if (user) {
           const saved = await m.fetchSaved();
           this.setState({ user, saved, loadingAuth: false });
+          this.syncSaved(saved);
         } else {
           this.setState({ loadingAuth: false });
         }
@@ -265,48 +206,16 @@ class Component extends DCLogic {
   closeLogin() { this.setState({ showLogin: false }); }
   stop(e) { e.stopPropagation(); }
 
-  async logout() {
-    try { if (this._sb) await this._sb.signOut(); } catch (e) {}
-    this.setState({ user: null, saved: [], menuOpen: false });
-    this.showToast('Kamu telah keluar');
-  }
-
   removeSaved(item) {
     const saved = this.state.saved.filter(s => s.name !== item.name);
     this.setState({ saved });
+    this.syncSaved(saved);
     this.showToast('Dihapus dari koleksi');
     if (this._sb) this._sb.removeSaved(item.name);
   }
 
   openShare(item) { this.setState({ shareTarget: item }); }
   closeShare() { this.setState({ shareTarget: null }); }
-
-  // ===== Masukan / feedback =====
-  openFeedback() { this.setState({ showFeedback: true, menuOpen: false }); }
-  closeFeedback() { if (!this.state.fbSending) this.setState({ showFeedback: false }); }
-  setFb(k, v) { this.setState({ [k]: v }); }
-  async submitFeedback() {
-    if (this.state.fbSending) return;
-    const msg = (this.state.fbMsg || '').trim();
-    if (!msg) { this.showToast('Tulis dulu masukanmu ya'); return; }
-    this.setState({ fbSending: true });
-    try {
-      const headers = { 'Content-Type': 'application/json' };
-      const token = this._sb && await this._sb.getAccessToken();
-      if (token) headers.Authorization = 'Bearer ' + token;
-      const resp = await fetch('/api/feedback', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ message: msg, email: (this.state.fbEmail || '').trim(), page: 'nama-tersimpan', hp: this.state.fbHp || '' }),
-      });
-      if (!resp.ok) throw new Error('fail');
-      this.setState({ showFeedback: false, fbSending: false, fbMsg: '', fbEmail: '' });
-      this.showToast('Terima kasih atas masukanmu 🙏');
-    } catch (e) {
-      this.setState({ fbSending: false });
-      this.showToast('Gagal mengirim, coba lagi ya');
-    }
-  }
 
   shareTo(channel) {
     const it = this.state.shareTarget; if (!it) return;
@@ -352,39 +261,11 @@ class Component extends DCLogic {
       savedHas: loggedIn && st.saved.length > 0,
       savedItems,
 
-      hasUser: loggedIn,
-      noUser: !loggedIn,
-      userInitial: st.user ? st.user.initial : '',
       openLogin: () => this.openLogin(),
-      logout: () => this.logout(),
-
-      showFeedback: st.showFeedback,
-      fbMsg: st.fbMsg,
-      fbEmail: st.fbEmail,
-      fbHp: st.fbHp,
-      fbSending: st.fbSending,
-      fbNotSending: !st.fbSending,
-      fbShowEmail: !st.user,
-      openFeedback: () => this.openFeedback(),
-      closeFeedback: () => this.closeFeedback(),
-      onFbMsg: (e) => this.setFb('fbMsg', e.target.value),
-      onFbEmail: (e) => this.setFb('fbEmail', e.target.value),
-      onFbHp: (e) => this.setFb('fbHp', e.target.value),
-      submitFeedback: () => this.submitFeedback(),
 
       showLogin: st.showLogin,
       closeLogin: () => this.closeLogin(),
       doLogin: () => this.doLogin(),
-      hasAvatar: !!(st.user && st.user.picture),
-      noAvatar: !(st.user && st.user.picture),
-      userPicture: st.user ? st.user.picture : '',
-      userName: st.user ? st.user.name : '',
-      userEmail: st.user ? st.user.email : '',
-      menuOpen: st.menuOpen,
-      openMenu: () => this.setState({ menuOpen: true }),
-      closeMenu: () => this.setState({ menuOpen: false }),
-      toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
-      avatarStyle: (st.user && st.user.picture) ? 'width:34px;height:34px;border-radius:50%;background-size:cover;background-position:center;background-repeat:no-repeat;background-image:url("' + st.user.picture + '")' : 'width:34px;height:34px;border-radius:50%;background:#3CA274',
       stop: (e) => this.stop(e),
 
       hasShare: !!sh,
