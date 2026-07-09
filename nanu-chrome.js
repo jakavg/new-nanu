@@ -32,6 +32,34 @@
 
   var CAN_HOVER = !!(window.matchMedia && window.matchMedia('(hover: hover)').matches);
 
+  // Navbar dilukis sebelum auth selesai (~0,5 dtk). Tanpa ingatan, user yang sudah
+  // login melihat kilatan "Masuk" + badge hilang tiap pindah halaman. Kita simpan
+  // keadaan terakhir lalu merekonsiliasinya begitu auth sungguhan tiba.
+  var CACHE_KEY = 'nanu_chrome_v1';
+
+  function readCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function writeCache() {
+    try {
+      if (!user) { localStorage.removeItem(CACHE_KEY); return; }
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        name: user.name, email: user.email, initial: user.initial, picture: user.picture,
+        premium: premium, savedCount: savedCount,
+      }));
+    } catch (e) {}
+  }
+  function clearCache() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+
+  // Toast yang harus tampil SETELAH halaman berpindah (mis. "Kamu telah keluar").
+  function queueToast(msg) { try { sessionStorage.setItem('nanu_toast', msg); } catch (e) {} }
+  function flushToast() {
+    try {
+      var m = sessionStorage.getItem('nanu_toast');
+      if (m) { sessionStorage.removeItem('nanu_toast'); toast(m); }
+    } catch (e) {}
+  }
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -156,6 +184,8 @@
     // padahal daftarnya memang tidak disimpan — jadi user dibawa ke beranda.
     var dest = null;
     navbars.forEach(function (el) { if (!dest) dest = el.getAttribute('logout-href'); });
+    clearCache();
+    queueToast('Kamu telah keluar'); // halaman berpindah, jadi toast ditampilkan setelahnya
     supabase().then(function (m) { return m.signOut(); })
       .catch(function () {})
       .then(function () {
@@ -331,7 +361,13 @@
   function loadAuth() {
     supabase().then(function (m) {
       return m.getUser().then(function (u) {
-        if (!u) return;
+        if (!u) {
+          // Tak ada sesi. Bila tadi kita melukis dari ingatan (mis. sesi kedaluwarsa),
+          // kembalikan ke keadaan logout.
+          clearCache();
+          if (user) { user = null; premium = false; savedCount = 0; renderNavbars(); }
+          return;
+        }
         user = u;
         renderNavbars();
         return Promise.all([
@@ -340,6 +376,7 @@
         ]).then(function (res) {
           premium = !!res[0];
           savedCount = (res[1] || []).length;
+          writeCache();
           renderNavbars();
         });
       });
@@ -349,10 +386,12 @@
   // Halaman boleh menyinkronkan state yang mereka ubah sendiri.
   document.addEventListener('nanu:saved', function (e) {
     savedCount = (e.detail && e.detail.count) || 0;
+    writeCache();
     renderNavbars();
   });
   document.addEventListener('nanu:premium', function (e) {
     premium = !!(e.detail && e.detail.premium);
+    writeCache();
     renderNavbars();
   });
   document.addEventListener('click', function () { setMenu(false); });
@@ -379,8 +418,20 @@
   // sebelum <body> di-parse, sehingga navbar/footer sudah ter-upgrade pada paint
   // pertama. Dengan defer, sempat terlihat body putih + link fallback biru mentah.
   injectCss();
+
+  // Lukis optimistis dari ingatan agar tidak ada kilatan "Masuk" / badge hilang.
+  var cached = readCache();
+  if (cached) {
+    user = { name: cached.name, email: cached.email, initial: cached.initial, picture: cached.picture };
+    premium = !!cached.premium;
+    savedCount = cached.savedCount || 0;
+  }
+
   define('nanu-navbar', navbars, renderNavbars);
   define('nanu-footer', footers, renderFooters);
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', flushToast);
+  else flushToast();
 
   loadAuth();
 })();
