@@ -48,7 +48,10 @@
     'body{min-height:100vh;display:flex;flex-direction:column;margin:0;background:#F9EFEB}',
     'body>#dc-root{flex:1;display:flex;flex-direction:column}',
     'body>#dc-root>div{flex:1;display:flex;flex-direction:column}',
-    '.nnu-nav{position:sticky;top:0;z-index:40;background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC}',
+    // Sticky harus di elemen kustomnya: <header> di dalamnya setinggi induknya,
+    // jadi position:sticky di sana tidak pernah menempel saat scroll.
+    'nanu-navbar{display:block;position:sticky;top:0;z-index:40}',
+    '.nnu-nav{background:rgba(249,239,235,.86);backdrop-filter:blur(10px);border-bottom:1px solid #EDE2DC}',
     '.nnu-nav-in{max-width:880px;width:100%;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}',
     '.nnu-logo{display:flex;align-items:center;text-decoration:none}',
     '.nnu-logo img{height:42px;width:auto;display:block}',
@@ -120,9 +123,17 @@
   }
 
   function logout() {
+    // Halaman boleh menentukan tujuan setelah logout lewat <nanu-navbar logout-href="/">.
+    // Mis. /daftar-nama: reload di sana berarti generate nama baru (dan memakai jatah),
+    // padahal daftarnya memang tidak disimpan — jadi user dibawa ke beranda.
+    var dest = null;
+    navbars.forEach(function (el) { if (!dest) dest = el.getAttribute('logout-href'); });
     supabase().then(function (m) { return m.signOut(); })
       .catch(function () {})
-      .then(function () { window.location.reload(); });
+      .then(function () {
+        if (dest) window.location.href = dest;
+        else window.location.reload();
+      });
   }
 
   function goSaved() {
@@ -209,7 +220,6 @@
   function footerHtml() {
     return '<footer class="nnu-foot">'
       + '<div class="nnu-foot-links">'
-      + '<a href="/">Beranda</a>'
       + '<a href="/privasi">Kebijakan Privasi</a>'
       + '<a href="/ketentuan">Ketentuan Layanan</a>'
       + '<a href="/faq">Tanya Jawab</a>'
