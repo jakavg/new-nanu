@@ -30,6 +30,8 @@
   var navbars = [];
   var footers = [];
 
+  var CAN_HOVER = !!(window.matchMedia && window.matchMedia('(hover: hover)').matches);
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -150,14 +152,15 @@
         : '<div class="nnu-ava-lg-i">' + esc(user.initial || '?') + '</div>';
       var crown = premium ? '<div class="nnu-crown" title="Premium">' + CROWN + '</div>' : '';
       var pill = premium ? '<div class="nnu-pill">' + CROWN_SM + 'Premium</div>' : '';
-      var menu = menuOpen
-        ? '<div class="nnu-menu"><div class="nnu-menu-card">'
-          + '<div class="nnu-me">' + avaLg
-          + '<div style="min-width:0"><div class="nnu-name">' + esc(user.name || '') + '</div>'
-          + '<div class="nnu-email">' + esc(user.email || '') + '</div>' + pill + '</div></div>'
-          + '<button class="nnu-logout" type="button" data-nnu="logout">' + EXIT + 'Keluar</button>'
-          + '</div></div>'
-        : '';
+      // Menu SELALU ada di DOM; buka/tutup hanya meng-toggle display (lihat setMenu).
+      // Membangun ulang innerHTML saat hover membuat elemen di bawah kursor dibuat
+      // ulang → mouseenter menyala lagi → loop, dan tombol hancur sebelum 'click'.
+      var menu = '<div class="nnu-menu" style="display:' + (menuOpen ? 'block' : 'none') + '"><div class="nnu-menu-card">'
+        + '<div class="nnu-me">' + avaLg
+        + '<div style="min-width:0"><div class="nnu-name">' + esc(user.name || '') + '</div>'
+        + '<div class="nnu-email">' + esc(user.email || '') + '</div>' + pill + '</div></div>'
+        + '<button class="nnu-logout" type="button" data-nnu="logout">' + EXIT + 'Keluar</button>'
+        + '</div></div>';
       right = '<div class="nnu-ava-wrap" data-nnu="avawrap">'
         + '<button class="nnu-ava-btn" type="button" data-nnu="menu" title="' + esc(user.name || '') + '">' + ava + '</button>'
         + crown + menu + '</div>';
@@ -172,16 +175,28 @@
       + '</nav></div></header>';
   }
 
+  // Buka/tutup dropdown TANPA membangun ulang navbar (lihat catatan di navbarHtml).
+  function setMenu(open) {
+    if (menuOpen === open) return;
+    menuOpen = open;
+    navbars.forEach(function (el) {
+      var m = el.querySelector('.nnu-menu');
+      if (m) m.style.display = open ? 'block' : 'none';
+    });
+  }
+
   function bindNavbar(el) {
     el.querySelectorAll('[data-nnu]').forEach(function (n) {
       var a = n.getAttribute('data-nnu');
       if (a === 'login') n.onclick = emitLogin;
       if (a === 'logout') n.onclick = logout;
       if (a === 'saved') n.onclick = goSaved;
-      if (a === 'menu') n.onclick = function (e) { e.stopPropagation(); menuOpen = !menuOpen; renderNavbars(); };
-      if (a === 'avawrap') {
-        n.onmouseenter = function () { menuOpen = true; renderNavbars(); };
-        n.onmouseleave = function () { menuOpen = false; renderNavbars(); };
+      if (a === 'menu') n.onclick = function (e) { e.stopPropagation(); setMenu(!menuOpen); };
+      // Hanya di perangkat ber-hover sungguhan. Di layar sentuh browser menyalakan
+      // mouseenter tepat sebelum click, sehingga menu terbuka lalu langsung tertutup.
+      if (a === 'avawrap' && CAN_HOVER) {
+        n.onmouseenter = function () { setMenu(true); };
+        n.onmouseleave = function () { setMenu(false); };
       }
     });
   }
@@ -302,7 +317,7 @@
     premium = !!(e.detail && e.detail.premium);
     renderNavbars();
   });
-  document.addEventListener('click', function () { if (menuOpen) { menuOpen = false; renderNavbars(); } });
+  document.addEventListener('click', function () { setMenu(false); });
 
   window.NanuChrome = { openFeedback: openFeedback, toast: toast };
 
