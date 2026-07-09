@@ -38,8 +38,33 @@
     });
   }
 
+  // nanu-supabase.js menunggu global `window.supabase` (UMD dari CDN). Halaman dc
+  // memuatnya lewat <helmet>, halaman statis tidak — dulu itu membuat navbar di
+  // /privasi & /ketentuan selalu tampak logout dan tombol "Masuk" mati. Komponen
+  // kini memastikan sendiri library-nya ada, sehingga jalan di semua halaman.
+  var libP = null;
+  function ensureLib() {
+    if (window.supabase && window.supabase.createClient) return Promise.resolve();
+    if (libP) return libP;
+    libP = new Promise(function (resolve) {
+      if (!document.querySelector('script[src*="@supabase/supabase-js"]')) {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        s.onerror = resolve; // gagal muat → getClient() mengembalikan null, tidak crash
+        (document.head || document.documentElement).appendChild(s);
+      }
+      var n = 0;
+      (function tick() {
+        if (window.supabase && window.supabase.createClient) return resolve();
+        if (++n > 60) return resolve();
+        setTimeout(tick, 100);
+      })();
+    });
+    return libP;
+  }
+
   function supabase() {
-    if (!sb) sb = import('/nanu-supabase.js');
+    if (!sb) sb = ensureLib().then(function () { return import('/nanu-supabase.js'); });
     return sb;
   }
 
@@ -74,6 +99,9 @@
     '.nnu-pill{display:inline-flex;align-items:center;gap:4px;margin-top:5px;background:#FFF4DA;color:#B77A00;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px}',
     '.nnu-logout{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#F9EFEB;border:1px solid #EDE2DC;border-radius:10px;padding:10px;font-weight:700;font-size:13.5px;color:#EE5B3A;cursor:pointer;font-family:inherit}',
     '.nnu-logout:hover{background:#FDEAE4;border-color:#EE5B3A}',
+    // Selama app dc-runtime masih dimuat, bagian tengah kosong; margin-top:auto
+    // menahan footer tetap di dasar layar sehingga tak "melompat" ke atas.
+    'nanu-footer{display:block;margin-top:auto;width:100%}',
     '.nnu-foot{width:100%;padding:26px 20px 40px;text-align:center;border-top:1px solid #EDE2DC}',
     '.nnu-foot-links{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;justify-content:center;margin-bottom:12px}',
     '.nnu-foot-links a,.nnu-fb-open{color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;font-family:inherit}',
@@ -347,6 +375,10 @@
     });
   }
 
+  // Script ini dimuat NON-defer di <head>: CSS masuk dan elemen didefinisikan
+  // sebelum <body> di-parse, sehingga navbar/footer sudah ter-upgrade pada paint
+  // pertama. Dengan defer, sempat terlihat body putih + link fallback biru mentah.
+  injectCss();
   define('nanu-navbar', navbars, renderNavbars);
   define('nanu-footer', footers, renderFooters);
 
