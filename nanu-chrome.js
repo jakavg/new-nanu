@@ -151,6 +151,11 @@
     '.nnu-send[disabled]{opacity:.6;cursor:default}',
     '.nnu-cancel{background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:12px;cursor:pointer;width:100%;font-family:inherit}',
     '.nnu-hp{position:absolute;left:-9999px;width:1px;height:1px}',
+    '.nnu-modal-c{text-align:center}',
+    '.nnu-modal-c p{margin:0 0 26px}',
+    '.nnu-modal-logo{height:30px;margin:0 auto 22px;display:block}',
+    '.nnu-google{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer;font-family:inherit}',
+    '.nnu-google:hover{border-color:#185FA4;background:#FCF7F4}',
     '.nnu-toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:90;background:#0B2A3A;color:#fff;font-weight:600;font-size:14px;padding:13px 22px;border-radius:999px;box-shadow:0 14px 40px -12px rgba(11,42,58,.6)}',
   ].join('');
 
@@ -165,13 +170,42 @@
   var CROWN = '<svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"></path></svg>';
   var CROWN_SM = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#F6B93B"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"></path></svg>';
   var EXIT = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>';
+  var GOOGLE = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>';
 
   // ---------------------------------------------------------------- aksi
-  function emitLogin() {
-    // Halaman dengan modal login kontekstual (paywall) menangani ini.
-    var ev = new CustomEvent('nanu:login', { cancelable: true });
+  var LOGIN_DEFAULT = ['Masuk ke Nanu', 'Simpan & kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.'];
+
+  // Halaman dc punya modal login kontekstualnya sendiri: mereka memanggil
+  // preventDefault() lalu memakai `detail` untuk teksnya. Halaman statis tidak
+  // punya modal, jadi komponen menampilkan modalnya sendiri — bukan melempar
+  // user langsung ke Google tanpa penjelasan.
+  function emitLogin(title, msg) {
+    title = title || LOGIN_DEFAULT[0];
+    msg = msg || LOGIN_DEFAULT[1];
+    var ev = new CustomEvent('nanu:login', { cancelable: true, detail: { title: title, msg: msg } });
     document.dispatchEvent(ev);
-    if (!ev.defaultPrevented) loginDirect();
+    if (!ev.defaultPrevented) openLoginModal(title, msg);
+  }
+
+  var loginOvl = null;
+  function closeLoginModal() { if (loginOvl) { loginOvl.remove(); loginOvl = null; } }
+
+  function openLoginModal(title, msg) {
+    if (loginOvl) return;
+    loginOvl = document.createElement('div');
+    loginOvl.className = 'nnu-ovl';
+    loginOvl.innerHTML = '<div class="nnu-modal nnu-modal-c" data-nnu="card">'
+      + '<img class="nnu-modal-logo" src="/assets/nanu-logo.png" alt="Nanu">'
+      + '<h3>' + esc(title) + '</h3>'
+      + '<p>' + esc(msg) + '</p>'
+      + '<button class="nnu-google" type="button" data-nnu="google">' + GOOGLE + 'Lanjutkan dengan Google</button>'
+      + '<button class="nnu-cancel" type="button" data-nnu="cancel">Nanti saja</button>'
+      + '</div>';
+    document.body.appendChild(loginOvl);
+    loginOvl.onclick = closeLoginModal;
+    loginOvl.querySelector('[data-nnu="card"]').onclick = function (e) { e.stopPropagation(); };
+    loginOvl.querySelector('[data-nnu="cancel"]').onclick = closeLoginModal;
+    loginOvl.querySelector('[data-nnu="google"]').onclick = loginDirect;
   }
 
   function loginDirect() {
@@ -201,7 +235,7 @@
 
   function goSaved() {
     if (user) { window.location.href = '/nama-tersimpan'; return; }
-    emitLogin();
+    emitLogin('Masuk untuk lihat nama tersimpan', 'Koleksi nama favoritmu tersimpan aman di akunmu dan bisa diakses dari perangkat mana pun.');
   }
 
   function toast(msg) {
@@ -262,7 +296,8 @@
   function bindNavbar(el) {
     el.querySelectorAll('[data-nnu]').forEach(function (n) {
       var a = n.getAttribute('data-nnu');
-      if (a === 'login') n.onclick = emitLogin;
+      // Jangan `n.onclick = emitLogin`: MouseEvent akan terkirim sebagai judul.
+      if (a === 'login') n.onclick = function () { emitLogin(); };
       if (a === 'logout') n.onclick = logout;
       if (a === 'saved') n.onclick = goSaved;
       if (a === 'menu') n.onclick = function (e) { e.stopPropagation(); setMenu(!menuOpen); };

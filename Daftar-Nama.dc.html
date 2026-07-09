@@ -254,7 +254,7 @@ class Component extends DCLogic {
 
   componentDidMount() {
     // Navbar bersama (nanu-chrome.js) minta login → pakai modal kontekstual halaman ini.
-    this._onLogin = (e) => { e.preventDefault(); this.promptLogin('Masuk ke Nanu', 'Masuk untuk menyimpan nama favorit dan membuka fitur lainnya.'); };
+    this._onLogin = (e) => { e.preventDefault(); const d = e.detail || {}; this.promptLogin(d.title, d.msg); };
     document.addEventListener('nanu:login', this._onLogin);
     const q = new URLSearchParams(window.location.search);
     let origin = q.get('origin'), length = q.get('length'), gender = q.get('gender'), keyword = q.get('keyword') || '';

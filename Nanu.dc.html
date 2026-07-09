@@ -183,7 +183,7 @@ class Component extends DCLogic {
 
   componentDidMount() {
     // Navbar bersama (nanu-chrome.js) minta login → pakai modal kontekstual halaman ini.
-    this._onLogin = (e) => { e.preventDefault(); this.promptLogin('Masuk ke Nanu', 'Simpan & kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.'); };
+    this._onLogin = (e) => { e.preventDefault(); const d = e.detail || {}; this.promptLogin(d.title, d.msg); };
     document.addEventListener('nanu:login', this._onLogin);
     // Simpan promise-nya: doSearch() menunggunya agar keputusan paywall tidak
     // diambil sebelum status login & kuota diketahui.
