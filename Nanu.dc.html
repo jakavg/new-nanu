@@ -259,21 +259,21 @@ class Component extends DCLogic {
   };
 
   componentDidMount() {
-    this.initAuth();
+    // Simpan promise-nya: doSearch() menunggunya agar keputusan paywall tidak
+    // diambil sebelum status login & kuota diketahui.
+    this._ready = this.initAuth();
   }
 
-  initAuth() {
-    import('./nanu-supabase.js').then(async (m) => {
+  async initAuth() {
+    try {
+      const m = await import('./nanu-supabase.js');
       this._sb = m;
-      try {
-        const user = await m.getUser();
-        if (user) {
-          const [premium, saved, accessToken] = await Promise.all([m.isPremium(), m.fetchSaved(), m.getAccessToken()]);
-          this.setState({ user, premium, saved, accessToken });
-          if (!premium) this.refreshQuota(accessToken);
-        }
-      } catch (e) {}
-    }).catch(() => {});
+      const user = await m.getUser();
+      if (!user) return;
+      const [premium, saved, accessToken] = await Promise.all([m.isPremium(), m.fetchSaved(), m.getAccessToken()]);
+      this.setState({ user, premium, saved, accessToken });
+      if (!premium) await this.refreshQuota(accessToken);
+    } catch (e) { /* biarkan: gate asli tetap ada di server */ }
   }
 
   // Tahu lebih dulu apakah generate berikutnya akan diblokir (read-only, tak memakai jatah).
@@ -336,18 +336,26 @@ class Component extends DCLogic {
     }
   }
 
-  doSearch() {
+  async doSearch() {
     if (this.state.searching) return;
+    this.setState({ searching: true });
+
+    // Pastikan status login + kuota sudah diketahui sebelum memutuskan paywall,
+    // agar tidak salah menilai (mis. user login dianggap anonim).
+    if (this._ready) { try { await this._ready; } catch (e) {} }
 
     // Cegat limit DI SINI supaya modal muncul di atas beranda — user tak pernah
     // mendarat di halaman hasil yang kosong tanpa tahu sebabnya.
-    if (!this.state.premium) {
-      if (!this.state.user && this.freeUsesLocal() >= 2) {
+    const st = this.state;
+    if (!st.premium) {
+      if (!st.user && this.freeUsesLocal() >= 2) {
+        this.setState({ searching: false });
         this.track('paywall_login');
         this.promptLogin('Batas gratis kamu sudah habis', 'Kamu sudah memakai 2 pencarian gratis. Masuk untuk lanjut mencari nama — atau langsung Premium agar tanpa batas.');
         return;
       }
-      if (this.state.user && this.state.blocked) {
+      if (st.user && st.blocked) {
+        this.setState({ searching: false });
         this.track('paywall_upgrade');
         this.openUpgrade('limit');
         return;
