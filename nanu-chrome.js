@@ -130,6 +130,11 @@
     // Selama app dc-runtime masih dimuat, bagian tengah kosong; margin-top:auto
     // menahan footer tetap di dasar layar sehingga tak "melompat" ke atas.
     'nanu-footer{display:block;margin-top:auto;width:100%}',
+    // Link fallback statis (ada di HTML mentah demi crawler & verifikasi Google).
+    // Script ini blocking, jadi connectedCallback jalan saat <nanu-footer> masih
+    // kosong; parser lalu menempelkan <a> fallback SETELAH footer yang kita render.
+    // Sembunyikan langsung, dan buang dari DOM begitu parsing selesai.
+    'nanu-footer > a{display:none}',
     '.nnu-foot{width:100%;padding:26px 20px 40px;text-align:center;border-top:1px solid #EDE2DC}',
     '.nnu-foot-links{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;justify-content:center;margin-bottom:12px}',
     '.nnu-foot-links a,.nnu-fb-open{color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;font-family:inherit}',
@@ -295,6 +300,14 @@
     });
   }
 
+  // Buang <a> fallback yang ditempelkan parser setelah footer kita ter-render.
+  function dropFallbackLinks() {
+    footers.forEach(function (el) {
+      var strays = el.querySelectorAll(':scope > a');
+      for (var i = 0; i < strays.length; i++) strays[i].remove();
+    });
+  }
+
   // ---------------------------------------------------------- modal masukan
   var fbOvl = null;
 
@@ -430,8 +443,9 @@
   define('nanu-navbar', navbars, renderNavbars);
   define('nanu-footer', footers, renderFooters);
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', flushToast);
-  else flushToast();
+  function onReady() { dropFallbackLinks(); flushToast(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onReady);
+  else onReady();
 
   loadAuth();
 })();
