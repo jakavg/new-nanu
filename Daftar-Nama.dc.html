@@ -240,8 +240,8 @@
         <div style="width:60px;height:60px;border-radius:50%;background:#FDEAE4;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#EE5B3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9z"></path></svg>
         </div>
-        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Buka nama tak terbatas</h3>
-        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 18px">Sekali bayar, buka ribuan inspirasi nama &mdash; berlaku selamanya.</p>
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">{{ upgradeTitle }}</h3>
+        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 18px">{{ upgradeMsg }}</p>
         <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:30px;color:#0B2A3A;margin-bottom:4px">{{ priceText }}</div>
         <p style="color:#8A969C;font-size:12.5px;margin:0 0 22px">Sekali bayar &middot; QRIS / e-wallet / kartu</p>
         <button onClick="{{ startPayment }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#EE5B3A;border:none;color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;padding:14px;border-radius:14px;cursor:pointer" style-hover="filter:brightness(1.05)">
@@ -325,6 +325,8 @@ class Component extends DCLogic {
     loginMsg: 'Masuk untuk menyimpan nama favorit dan membuka fitur lainnya.',
     shareTarget: null, toast: '', menuOpen: false,
     premium: false, accessToken: null, showUpgrade: false, paying: false,
+    // 'limit' = jatah gratis habis · 'more' = upgrade proaktif (Muat lebih banyak)
+    upgradeReason: 'limit',
     showFeedback: false, fbMsg: '', fbEmail: '', fbHp: '', fbSending: false,
   };
 
@@ -441,7 +443,7 @@ class Component extends DCLogic {
     // user login non-premium digate di server (jatah free_uses).
     if (!this.state.user && this.freeUsesLocal() >= 2) {
       this.track('paywall_login');
-      this.promptLogin('Lanjut cari nama?', 'Login gratis untuk membuat lebih banyak rangkaian nama.');
+      this.promptLogin('Batas gratis kamu sudah habis', 'Kamu sudah memakai 2 pencarian gratis. Masuk untuk lanjut mencari nama — atau langsung Premium agar tanpa batas.');
       return;
     }
     const prevResults = this.state.results; // simpan agar bisa dipulihkan bila jatah habis
@@ -452,7 +454,7 @@ class Component extends DCLogic {
       // tapi tetap tampilkan list terakhir (jangan hilang saat modal ditutup).
       if (this._lastMeta && this._lastMeta.limit === 'free') {
         this.track('paywall_upgrade');
-        this.setState({ loading: false, showUpgrade: true, results: prevResults });
+        this.setState({ loading: false, showUpgrade: true, upgradeReason: 'limit', results: prevResults });
         return;
       }
       const data = this.parse(raw);
@@ -471,7 +473,7 @@ class Component extends DCLogic {
   async loadMore() {
     if (this.state.loadingMore) return;
     if (!this.state.user) { this.promptLogin('Masuk untuk lihat nama lainnya', 'Login dulu untuk memuat lebih banyak pilihan nama.'); return; }
-    if (!this.state.premium) { this.track('paywall_upgrade'); this.setState({ showUpgrade: true }); return; }
+    if (!this.state.premium) { this.track('paywall_upgrade'); this.openUpgrade('more'); return; }
     const count = this.props.resultsCount ?? 5;
     const existing = this.state.results.map(r => r.name);
     this.setState({ loadingMore: true });
@@ -483,7 +485,7 @@ class Component extends DCLogic {
       else this.relaxToast();
     } catch (e) {
       if (String(e && e.message) === 'premium-required') {
-        this.setState({ loadingMore: false, premium: false, showUpgrade: true });
+        this.setState({ loadingMore: false, premium: false, showUpgrade: true, upgradeReason: 'more' });
         return;
       }
       this.setState({ loadingMore: false });
@@ -583,7 +585,7 @@ class Component extends DCLogic {
   }
 
   // ===== Pembayaran Midtrans (QRIS) untuk membuka generate tak terbatas =====
-  openUpgrade() { this.setState({ showUpgrade: true }); }
+  openUpgrade(reason) { this.setState({ showUpgrade: true, upgradeReason: reason || 'limit' }); }
   closeUpgrade() { this.setState({ showUpgrade: false }); }
 
   async startPayment() {
@@ -788,6 +790,10 @@ class Component extends DCLogic {
       doLogin: () => this.doLogin(),
 
       showUpgrade: st.showUpgrade,
+      upgradeTitle: st.upgradeReason === 'limit' ? 'Jatah gratis kamu sudah habis' : 'Buka nama tak terbatas',
+      upgradeMsg: st.upgradeReason === 'limit'
+        ? 'Kamu sudah memakai semua pencarian gratis. Upgrade Premium untuk mencari nama tanpa batas.'
+        : 'Sekali bayar, buka ribuan inspirasi nama — berlaku selamanya.',
       closeUpgrade: () => this.closeUpgrade(),
       startPayment: () => this.startPayment(),
       paying: st.paying,

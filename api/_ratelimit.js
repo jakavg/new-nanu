@@ -22,7 +22,7 @@ function getRedis() {
 }
 
 // [max request, window detik] per IP
-const LIMITS = { generate: [30, 10], feedback: [5, 3600], payment: [10, 3600] };
+const LIMITS = { generate: [30, 10], feedback: [5, 3600], payment: [10, 3600], quota: [60, 60] };
 
 function clientIp(req) {
   const xff = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();

@@ -27,6 +27,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-YU7xfUUHpcNsevRU"></script>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -206,13 +207,33 @@
     <div onClick="{{ closeLogin }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
       <div onClick="{{ stop }}" style="background:#fff;border-radius:26px;max-width:380px;width:100%;padding:34px 30px;text-align:center;animation:nanuPop .28s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)">
         <img src="assets/nanu-logo.png" alt="Nanu" style="height:30px;margin:0 auto 22px;display:block">
-        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">Masuk ke Nanu</h3>
-        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 26px">Simpan &amp; kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.</p>
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">{{ loginTitle }}</h3>
+        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 26px">{{ loginMsg }}</p>
         <button onClick="{{ doLogin }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:2px solid #EDE2DC;border-radius:14px;padding:14px;font-weight:700;font-size:15px;color:#0B2A3A;cursor:pointer" style-hover="border-color:#185FA4;background:#FCF7F4">
           <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>
           Lanjutkan dengan Google
         </button>
         <button onClick="{{ closeLogin }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ UPGRADE / PAYMENT MODAL ============ -->
+  <sc-if value="{{ showUpgrade }}">
+    <div onClick="{{ closeUpgrade }}" style="position:fixed;inset:0;z-index:60;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:26px;max-width:380px;width:100%;padding:34px 30px;text-align:center;animation:nanuPop .28s cubic-bezier(.2,.8,.3,1) both;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)">
+        <div style="width:60px;height:60px;border-radius:50%;background:#FDEAE4;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#EE5B3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5L18 21l-6-3.8L6 21l1.5-7L2 9.5 9 9z"></path></svg>
+        </div>
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0 0 8px">{{ upgradeTitle }}</h3>
+        <p style="color:#5C6B72;font-size:14.5px;line-height:1.55;margin:0 0 18px">{{ upgradeMsg }}</p>
+        <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:30px;color:#0B2A3A;margin-bottom:4px">{{ priceText }}</div>
+        <p style="color:#8A969C;font-size:12.5px;margin:0 0 22px">Sekali bayar &middot; QRIS / e-wallet / kartu</p>
+        <button onClick="{{ startPayment }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#EE5B3A;border:none;color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;padding:14px;border-radius:14px;cursor:pointer" style-hover="filter:brightness(1.05)">
+          <sc-if value="{{ paying }}"><span style="width:18px;height:18px;border:2.5px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:nanuSpin .8s linear infinite"></span> Memproses…</sc-if>
+          <sc-if value="{{ notPaying }}">Bayar dengan QRIS</sc-if>
+        </button>
+        <button onClick="{{ closeUpgrade }}" style="background:none;border:none;color:#8A969C;font-weight:600;font-size:13.5px;margin-top:16px;cursor:pointer">Nanti saja</button>
       </div>
     </div>
   </sc-if>
@@ -230,6 +251,11 @@ class Component extends DCLogic {
     keyword: '', origin: 'jawa', length: '2', gender: 'lk',
     saved: [], user: null, premium: false, showLogin: false, toast: '', menuOpen: false, searching: false,
     showFeedback: false, fbMsg: '', fbEmail: '', fbHp: '', fbSending: false,
+    loginTitle: 'Masuk ke Nanu',
+    loginMsg: 'Simpan & kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.',
+    // Paywall di beranda: cegat limit sebelum pindah halaman agar modal tampil
+    // di atas beranda (bukan di atas daftar nama yang kosong).
+    accessToken: null, blocked: false, showUpgrade: false, upgradeReason: 'limit', paying: false,
   };
 
   componentDidMount() {
@@ -242,12 +268,28 @@ class Component extends DCLogic {
       try {
         const user = await m.getUser();
         if (user) {
-          const [premium, saved] = await Promise.all([m.isPremium(), m.fetchSaved()]);
-          this.setState({ user, premium, saved });
+          const [premium, saved, accessToken] = await Promise.all([m.isPremium(), m.fetchSaved(), m.getAccessToken()]);
+          this.setState({ user, premium, saved, accessToken });
+          if (!premium) this.refreshQuota(accessToken);
         }
       } catch (e) {}
     }).catch(() => {});
   }
+
+  // Tahu lebih dulu apakah generate berikutnya akan diblokir (read-only, tak memakai jatah).
+  async refreshQuota(token) {
+    if (!token) return;
+    try {
+      const r = await fetch('/api/quota', { headers: { Authorization: 'Bearer ' + token } });
+      const d = await r.json();
+      this.setState({ blocked: !!d.blocked, premium: !!d.premium });
+    } catch (e) { /* fail-open: gate asli tetap di server saat generate */ }
+  }
+
+  freeUsesLocal() { try { return parseInt(localStorage.getItem('nanu_free_uses') || '0', 10) || 0; } catch (e) { return 0; } }
+
+  // Analytics event (Vercel Web Analytics) — aman kalau script belum termuat.
+  track(name) { try { if (window.va) window.va('event', { name }); } catch (e) {} }
 
   doLogin() {
     if (!this._sb) return;
@@ -296,6 +338,22 @@ class Component extends DCLogic {
 
   doSearch() {
     if (this.state.searching) return;
+
+    // Cegat limit DI SINI supaya modal muncul di atas beranda — user tak pernah
+    // mendarat di halaman hasil yang kosong tanpa tahu sebabnya.
+    if (!this.state.premium) {
+      if (!this.state.user && this.freeUsesLocal() >= 2) {
+        this.track('paywall_login');
+        this.promptLogin('Batas gratis kamu sudah habis', 'Kamu sudah memakai 2 pencarian gratis. Masuk untuk lanjut mencari nama — atau langsung Premium agar tanpa batas.');
+        return;
+      }
+      if (this.state.user && this.state.blocked) {
+        this.track('paywall_upgrade');
+        this.openUpgrade('limit');
+        return;
+      }
+    }
+
     const { origin, length, gender } = this.state;
     const kw = this.state.keyword.trim();
     const params = { origin, length, gender, keyword: kw };
@@ -310,13 +368,73 @@ class Component extends DCLogic {
 
   goSaved() {
     if (this.state.user) { window.location.href = '/nama-tersimpan'; return; }
-    this.setState({ showLogin: true });
-    this.showToast('Masuk dulu untuk melihat koleksi');
+    this.promptLogin('Masuk untuk lihat nama tersimpan', 'Koleksi nama favoritmu tersimpan aman di akunmu.');
   }
 
-  openLogin() { this.setState({ showLogin: true }); }
+  // Buka modal login dengan teks sesuai konteks (simpan / kena limit / dll).
+  promptLogin(title, msg) {
+    this.setState({
+      showLogin: true,
+      menuOpen: false,
+      loginTitle: title || 'Masuk ke Nanu',
+      loginMsg: msg || 'Simpan & kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.',
+    });
+  }
+  openLogin() { this.promptLogin('Masuk ke Nanu', 'Simpan & kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.'); }
   closeLogin() { this.setState({ showLogin: false }); }
   stop(e) { e.stopPropagation(); }
+
+  // ===== Pembayaran Midtrans (QRIS) — sama seperti di halaman hasil =====
+  // reason: 'limit' (jatah habis) | 'more' (upgrade proaktif) → menentukan copy modal.
+  openUpgrade(reason) { this.setState({ showUpgrade: true, upgradeReason: reason || 'limit', menuOpen: false }); }
+  closeUpgrade() { if (!this.state.paying) this.setState({ showUpgrade: false }); }
+
+  async startPayment() {
+    if (!this.state.user) { this.setState({ showUpgrade: false }); this.promptLogin('Masuk ke Nanu', 'Masuk dulu untuk melanjutkan pembayaran.'); return; }
+    if (!window.snap) { this.showToast('Pembayaran belum siap, coba lagi sebentar'); return; }
+    this.track('checkout_start');
+    this.setState({ paying: true });
+    try {
+      const token = this.state.accessToken || (this._sb && await this._sb.getAccessToken());
+      const resp = await fetch('/api/payment/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      });
+      const data = await resp.json();
+      if (data.alreadyPremium) { this.setState({ premium: true, blocked: false, paying: false, showUpgrade: false }); this.showToast('Kamu sudah premium'); return; }
+      if (!resp.ok || !data.token) throw new Error(data.detail || data.error || 'create-failed');
+      this.setState({ paying: false });
+      window.snap.pay(data.token, {
+        onSuccess: () => this.afterPay(data.orderId),
+        onPending: () => this.afterPay(data.orderId),
+        onError: () => this.showToast('Pembayaran gagal'),
+        onClose: () => this.showToast('Jendela pembayaran ditutup'),
+      });
+    } catch (e) {
+      this.setState({ paying: false });
+      this.showToast('Gagal memulai pembayaran');
+    }
+  }
+
+  async afterPay(orderId) {
+    this.setState({ showUpgrade: false });
+    this.showToast('Memverifikasi pembayaran…');
+    for (let i = 0; i < 12; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      try {
+        const token = this.state.accessToken || (this._sb && await this._sb.getAccessToken());
+        const r = await fetch('/api/payment/status?order_id=' + encodeURIComponent(orderId), { headers: { Authorization: 'Bearer ' + token } });
+        const d = await r.json();
+        if (d.premium) {
+          this.track('purchase');
+          this.setState({ premium: true, blocked: false });
+          this.showToast('Pembayaran berhasil · cari nama tanpa batas');
+          return;
+        }
+      } catch (e) {}
+    }
+    this.showToast('Pembayaran sedang diproses, tunggu sebentar lalu coba lagi');
+  }
 
   async logout() {
     try { if (this._sb) await this._sb.signOut(); } catch (e) {}
@@ -356,6 +474,9 @@ class Component extends DCLogic {
       label: w, onClick: () => this.setField('keyword', w),
     }));
 
+    // Copy modal upgrade dibedakan: sudah kena limit vs upgrade proaktif.
+    const limitHit = st.upgradeReason === 'limit';
+
     return {
       keyword: st.keyword,
       onKeyword: (e) => this.setField('keyword', e.target.value),
@@ -378,8 +499,21 @@ class Component extends DCLogic {
       logout: () => this.logout(),
 
       showLogin: st.showLogin,
+      loginTitle: st.loginTitle,
+      loginMsg: st.loginMsg,
       closeLogin: () => this.closeLogin(),
       doLogin: () => this.doLogin(),
+
+      showUpgrade: st.showUpgrade,
+      upgradeTitle: limitHit ? 'Jatah gratis kamu sudah habis' : 'Buka nama tak terbatas',
+      upgradeMsg: limitHit
+        ? 'Kamu sudah memakai semua pencarian gratis. Upgrade Premium untuk mencari nama tanpa batas.'
+        : 'Sekali bayar, buka ribuan inspirasi nama — berlaku selamanya.',
+      priceText: 'Rp 30.000',
+      paying: st.paying,
+      notPaying: !st.paying,
+      closeUpgrade: () => this.closeUpgrade(),
+      startPayment: () => this.startPayment(),
       hasAvatar: !!(st.user && st.user.picture),
       noAvatar: !(st.user && st.user.picture),
       userPicture: st.user ? st.user.picture : '',
