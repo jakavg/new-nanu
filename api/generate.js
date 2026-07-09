@@ -96,7 +96,13 @@ module.exports = async (req, res) => {
           const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
           if (!(prof && prof.is_premium)) {
             const { data: allowed } = await supabase.rpc('consume_free_use', { p_uid: user.id, p_limit: FREE_LIMIT });
-            if (allowed !== true) { res.status(200).json({ text: '[]', source: 'bank', limit: 'free' }); return; }
+            if (allowed !== true) {
+              // Jatah lifetime habis → beri "1x lihat per hari" (waktu Asia/Jakarta)
+              // agar returning user tetap dapat 1 list nama dulu; generate berikutnya
+              // di hari yang sama baru memunculkan paywall.
+              const { data: peek } = await supabase.rpc('consume_daily_peek', { p_uid: user.id });
+              if (peek !== true) { res.status(200).json({ text: '[]', source: 'bank', limit: 'free' }); return; }
+            }
           }
         }
       } catch (e) { /* token invalid → perlakukan sebagai anonim, lanjut */ }
