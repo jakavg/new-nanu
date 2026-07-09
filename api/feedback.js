@@ -6,7 +6,10 @@ const { allow } = require('./_ratelimit');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
-  if (!(await allow(req, 'feedback'))) { res.status(429).json({ error: 'Terlalu banyak kiriman, coba lagi nanti ya.' }); return; }
+
+  // Pagar per IP: menahan banjir permintaan sebelum kita membayar biaya verifikasi
+  // token. Angkanya tinggi agar IP bersama (CGNAT operator seluler) tidak terjegal.
+  if (!(await allow(req, 'feedback_guard'))) { res.status(429).json({ error: 'Terlalu banyak kiriman, coba lagi nanti ya.' }); return; }
 
   const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -43,6 +46,14 @@ module.exports = async (req, res) => {
       if (data && data.user) { userId = data.user.id; accountEmail = data.user.email || null; }
     } catch (e) { /* anonim */ }
   }
+
+  // Batas sesungguhnya: user login dihitung PER AKUN (IP-nya tidak relevan, jadi
+  // pelanggan di balik satu IP CGNAT tidak saling memakan jatah). Anonim terpaksa
+  // dihitung per IP karena tak ada identitas lain.
+  const ok = userId
+    ? await allow(req, 'feedback_user', 'u:' + userId)
+    : await allow(req, 'feedback_ip');
+  if (!ok) { res.status(429).json({ error: 'Terlalu banyak kiriman, coba lagi nanti ya.' }); return; }
 
   // Simpan email untuk follow-up: utamakan yang diketik user, jika kosong pakai email akun.
   const finalEmail = email || accountEmail;
