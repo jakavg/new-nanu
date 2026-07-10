@@ -1,0 +1,8 @@
+# File yang tetap ada di git untuk versioning, tetapi TIDAK perlu di-deploy /
+# disajikan publik. Bukan aset runtime.
+
+# Pipeline & data leksikon (dipakai offline untuk membangun name bank di Supabase).
+scripts
+
+# Helper Google Identity Services lama — sudah digantikan Supabase Auth, dead code.
+nanu-auth.js
