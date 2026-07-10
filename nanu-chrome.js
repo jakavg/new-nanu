@@ -139,6 +139,9 @@
     '.nnu-foot-links{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;justify-content:center;margin-bottom:12px}',
     '.nnu-foot-links a,.nnu-fb-open{color:#5C6B72;font-weight:600;font-size:13.5px;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;font-family:inherit}',
     '.nnu-fb-open:hover,.nnu-foot-links a:hover{color:#3CA274}',
+    '.nnu-social{display:flex;gap:16px;align-items:center;justify-content:center;margin-bottom:14px}',
+    '.nnu-social a{display:flex;color:#8A969C;transition:color .15s}',
+    '.nnu-social a:hover{color:#0B2A3A}',
     '.nnu-copy{color:#A9B3B8;font-size:12.5px}',
     '.nnu-ovl{position:fixed;inset:0;z-index:70;background:rgba(11,42,58,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px}',
     '.nnu-modal{background:#fff;border-radius:26px;max-width:400px;width:100%;padding:30px;box-shadow:0 30px 70px -20px rgba(11,42,58,.4)}',
@@ -173,6 +176,10 @@
   var CROWN_SM = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#F6B93B"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"></path></svg>';
   var EXIT = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>';
   var GOOGLE = '<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"></path><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.3-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.2a11 11 0 0 0 0 9.8z"></path><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.2 7.1l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"></path></svg>';
+  // Ikon sosial (monokrom, mewarisi currentColor).
+  var IG = '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle></svg>';
+  var FB = '<svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"></path></svg>';
+  var TH = '<svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M12.2 22h-.06C8.9 21.98 6.4 20.9 4.7 18.8 3.2 16.94 2.4 14.35 2.38 11.1v-.02C2.4 7.83 3.2 5.24 4.7 3.38 6.4 1.28 8.9.2 12.14.18h.06c2.48.02 4.55.66 6.15 1.9 1.5 1.16 2.56 2.82 3.13 4.92l-1.94.53c-.98-3.56-3.4-5.38-7.35-5.4-2.6.02-4.57.85-5.85 2.45C5.14 6.6 4.5 8.65 4.48 11.1c.02 2.44.66 4.5 1.86 5.98 1.28 1.6 3.25 2.43 5.85 2.45 2.35-.02 3.9-.57 5.2-1.83 1.48-1.44 1.46-3.2 1.02-4.27-.26-.63-.73-1.15-1.36-1.55-.16 1.14-.5 2.06-1.05 2.77-.72.95-1.75 1.47-3.05 1.55-1 .06-1.95-.17-2.7-.66-.88-.58-1.4-1.47-1.46-2.5-.12-2.05 1.5-3.52 4.04-3.67.9-.05 1.74-.01 2.51.11-.1-.62-.31-1.11-.62-1.46-.42-.48-1.08-.72-1.94-.73h-.03c-.7 0-1.64.2-2.24 1.1l-1.65-1.11c.8-1.19 2.11-1.85 3.89-1.85h.04c2.98.02 4.75 1.85 5.03 5.03.16.07.32.14.47.22 1.4.66 2.42 1.66 2.96 2.9.75 1.72.82 4.53-1.46 6.75-1.74 1.7-3.85 2.46-6.85 2.48zM13.6 11.2c-.28 0-.56.01-.85.03-1.9.11-2.3.98-2.26 1.6.05.83.95 1.22 1.82 1.17.8-.05 1.83-.36 2-2.72-.23-.05-.47-.08-.71-.08z"></path></svg>';
 
   // ---------------------------------------------------------------- aksi
   var LOGIN_DEFAULT = ['Masuk ke Nanu', 'Simpan & kelola nama favoritmu agar bisa diakses kapan saja dari perangkat mana pun.'];
@@ -324,6 +331,11 @@
       + '<a href="/ketentuan">Ketentuan Layanan</a>'
       + '<a href="/faq">Tanya Jawab</a>'
       + '<button class="nnu-fb-open" type="button" data-nnu="feedback">Beri masukan</button>'
+      + '</div>'
+      + '<div class="nnu-social">'
+      + '<a href="https://www.instagram.com/namaku.nanu/" target="_blank" rel="noopener noreferrer" aria-label="Instagram Nanu" title="Instagram">' + IG + '</a>'
+      + '<a href="https://www.facebook.com/profile.php?id=61591840560103" target="_blank" rel="noopener noreferrer" aria-label="Facebook Nanu" title="Facebook">' + FB + '</a>'
+      + '<a href="https://www.threads.com/@namaku.nanu" target="_blank" rel="noopener noreferrer" aria-label="Threads Nanu" title="Threads">' + TH + '</a>'
       + '</div>'
       + '<div class="nnu-copy">© 2026 Nanu · Made with ❤️</div>'
       + '</footer>';
