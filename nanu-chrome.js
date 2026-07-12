@@ -20,6 +20,17 @@
   if (window.__nanuChrome) return;
   window.__nanuChrome = true;
 
+  // ------------------------------------------------------- PWA (manifest + SW)
+  if (!document.querySelector('link[rel="manifest"]')) {
+    var manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = '/manifest.json';
+    document.head.appendChild(manifestLink);
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function () {});
+  }
+
   // ---------------------------------------------------------------- state
   var sb = null;            // modul nanu-supabase.js (dimuat malas)
   var user = null;

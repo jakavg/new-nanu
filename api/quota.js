@@ -25,20 +25,30 @@ const OPEN = { premium: false, blocked: false, remaining: null };
 
 module.exports = async (req, res) => {
   if (req.method !== 'GET') { res.status(405).json({ error: 'Method not allowed' }); return; }
-  if (!(await allow(req, 'quota'))) { res.status(429).json({ error: 'Terlalu banyak permintaan.' }); return; }
+  if (!(await allow(req, 'quota_guard'))) { res.status(429).json({ error: 'Terlalu banyak permintaan.' }); return; }
 
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
-  // Anonim dibatasi di client (localStorage) — server tak menyimpan hitungannya.
-  if (!token) { res.status(200).json(OPEN); return; }
+  const supabase = token ? getServiceClient() : null;
 
-  const supabase = getServiceClient();
-  if (!supabase) { res.status(200).json(OPEN); return; }
+  let user = null;
+  if (token && supabase) {
+    try {
+      const { data: ures } = await supabase.auth.getUser(token);
+      user = ures && ures.user;
+    } catch (e) { user = null; /* token invalid → diperlakukan sebagai anonim */ }
+  }
+
+  if (!user) {
+    // Anonim (token kosong/invalid, atau Supabase tak terkonfigurasi): tak ada
+    // identitas selain IP → batasi per IP (real limit, bukan cuma pagar longgar).
+    if (!(await allow(req, 'quota_ip'))) { res.status(429).json({ error: 'Terlalu banyak permintaan.' }); return; }
+    res.status(200).json(OPEN);
+    return;
+  }
+
+  if (!(await allow(req, 'quota_user', 'u:' + user.id))) { res.status(429).json({ error: 'Terlalu banyak permintaan.' }); return; }
 
   try {
-    const { data: ures } = await supabase.auth.getUser(token);
-    const user = ures && ures.user;
-    if (!user) { res.status(200).json(OPEN); return; }
-
     const { data: prof } = await supabase
       .from('profiles').select('is_premium, free_uses, last_peek_date').eq('id', user.id).maybeSingle();
 

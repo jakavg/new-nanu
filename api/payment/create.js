@@ -8,7 +8,7 @@ const PRICE = 30000; // Rp 30.000 — gross_amount harus integer IDR
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
-  if (!(await allow(req, 'payment'))) { res.status(429).json({ error: 'Terlalu banyak percobaan, coba lagi nanti ya.' }); return; }
+  if (!(await allow(req, 'payment_guard'))) { res.status(429).json({ error: 'Terlalu banyak percobaan, coba lagi nanti ya.' }); return; }
 
   const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, MIDTRANS_SERVER_KEY } = process.env;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !MIDTRANS_SERVER_KEY) {
@@ -26,6 +26,7 @@ module.exports = async (req, res) => {
   const { data: ures, error: uerr } = await supabase.auth.getUser(token);
   const user = ures && ures.user;
   if (uerr || !user) { res.status(401).json({ error: 'Sesi tidak valid, silakan login ulang.' }); return; }
+  if (!(await allow(req, 'payment_user', 'u:' + user.id))) { res.status(429).json({ error: 'Terlalu banyak percobaan, coba lagi nanti ya.' }); return; }
 
   // Sudah premium? Tidak perlu bayar lagi.
   const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();

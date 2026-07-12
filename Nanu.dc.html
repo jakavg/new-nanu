@@ -212,6 +212,7 @@ class Component extends DCLogic {
     if (!token) return;
     try {
       const r = await fetch('/api/quota', { headers: { Authorization: 'Bearer ' + token } });
+      if (!r.ok) return; // fail-open: gate asli tetap di server saat generate
       const d = await r.json();
       this.setState({ blocked: !!d.blocked, premium: !!d.premium });
       if (d.premium) this.syncPremium(true);

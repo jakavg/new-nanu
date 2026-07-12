@@ -25,15 +25,28 @@ function getRedis() {
 // eksplisit untuk mengunci per akun.
 //
 // Catatan soal IP: operator seluler memakai CGNAT, jadi banyak pelanggan tampak
-// dari satu IP. Karena itu masukan dari user LOGIN dibatasi per akun, dan batas
-// per IP hanya dipakai untuk anonim (dengan angka yang cukup longgar).
+// dari satu IP. Polanya (sama untuk generate/quota/payment/feedback, tiga tingkat
+// — nama kunci sendiri yang menandakan perannya, bukan cuma komentar, supaya tidak
+// ada lagi yang lupa melonggarkan *_guard saat menambah endpoint baru):
+//   *_guard → pagar anti-banjir per IP, LONGGAR, jalan sebelum identitas diketahui.
+//   *_user  → batas nyata untuk user LOGIN (per akun, kunci 'u:<uuid>').
+//   *_ip    → batas nyata untuk anonim/token tak valid (tak ada identitas lain).
+// payment_guard sengaja TIDAK dilonggarkan sebesar yang lain: tidak ada skenario
+// legit banyak percobaan gagal-auth dari satu IP (beda dgn generate/quota yang
+// anonim memang wajar trafiknya tinggi), jadi pagar ini tetap ketat untuk menahan
+// percobaan token curian/kedaluwarsa.
 const LIMITS = {
-  generate: [30, 10],
-  quota: [60, 60],
-  payment: [10, 3600],
-  feedback_guard: [60, 3600], // pagar per IP sebelum token diverifikasi (anti-banjir)
-  feedback_user: [10, 3600],  // per akun
-  feedback_ip: [15, 3600],    // anonim, per IP
+  generate_guard: [120, 10],
+  generate_user: [30, 10],
+  generate_ip: [30, 10],
+  quota_guard: [180, 60],
+  quota_user: [60, 60],
+  quota_ip: [60, 60],
+  payment_guard: [20, 3600],
+  payment_user: [10, 3600],
+  feedback_guard: [60, 3600],
+  feedback_user: [10, 3600],
+  feedback_ip: [15, 3600],
 };
 
 function clientIp(req) {

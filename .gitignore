@@ -13,6 +13,9 @@ $RECYCLE.BIN/
 *.swp
 *.swo
 
+# Claude Code (local config: launch.json, settings, etc.)
+.claude/
+
 # OS
 .DS_Store
 

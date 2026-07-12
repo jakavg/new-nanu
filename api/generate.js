@@ -26,6 +26,9 @@ async function requirePremium(req, supabase) {
   const { data: ures, error: uerr } = await supabase.auth.getUser(token);
   const user = ures && ures.user;
   if (uerr || !user) return { ok: false, code: 401, error: 'Sesi tidak valid.' };
+  if (!(await allow(req, 'generate_user', 'u:' + user.id))) {
+    return { ok: false, code: 429, error: 'Terlalu banyak permintaan, coba lagi sebentar ya.' };
+  }
   const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
   if (!(prof && prof.is_premium)) return { ok: false, code: 402, error: 'premium-required' };
   return { ok: true };
@@ -54,7 +57,7 @@ module.exports = async (req, res) => {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-  if (!(await allow(req, 'generate'))) {
+  if (!(await allow(req, 'generate_guard'))) {
     res.status(429).json({ error: 'Terlalu banyak permintaan, coba lagi sebentar ya.' });
     return;
   }
@@ -85,27 +88,45 @@ module.exports = async (req, res) => {
     if (!gate.ok) { res.status(gate.code).json({ error: gate.error }); return; }
   } else {
     // mode 'initial': user LOGIN non-premium dibatasi FREE_LIMIT (dihitung server,
-    // tak bisa di-bypass clear storage). Anonim → dilewati (dibatasi client via
-    // localStorage). Premium → unlimited.
+    // tak bisa di-bypass clear storage). Anonim → dibatasi per IP (generate_ip) di
+    // server + localStorage di client. Premium → unlimited.
     const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
+    let user = null;
     if (token) {
       try {
         const { data: ures } = await supabase.auth.getUser(token);
-        const user = ures && ures.user;
-        if (user) {
-          const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
-          if (!(prof && prof.is_premium)) {
-            const { data: allowed } = await supabase.rpc('consume_free_use', { p_uid: user.id, p_limit: FREE_LIMIT });
-            if (allowed !== true) {
-              // Jatah lifetime habis → beri "1x lihat per hari" (waktu Asia/Jakarta)
-              // agar returning user tetap dapat 1 list nama dulu; generate berikutnya
-              // di hari yang sama baru memunculkan paywall.
-              const { data: peek } = await supabase.rpc('consume_daily_peek', { p_uid: user.id });
-              if (peek !== true) { res.status(200).json({ text: '[]', source: 'bank', limit: 'free' }); return; }
-            }
+        user = ures && ures.user;
+      } catch (e) { user = null; /* token invalid → diperlakukan sebagai anonim */ }
+    }
+    if (user) {
+      if (!(await allow(req, 'generate_user', 'u:' + user.id))) {
+        res.status(429).json({ error: 'Terlalu banyak permintaan, coba lagi sebentar ya.' });
+        return;
+      }
+      try {
+        const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle();
+        if (!(prof && prof.is_premium)) {
+          // Ambil `error` juga: RPC bisa gagal di level DB (mis. migrasi, deadlock)
+          // dan mengembalikan {data:null, error} TANPA throw — kalau cuma dicek
+          // `allowed !== true`, itu bikin `undefined !== true` = true = "jatah
+          // habis", padahal seharusnya fail-open (sama kelas masalah dgn network
+          // error yang tertangkap catch di bawah).
+          const { data: allowed, error: freeErr } = await supabase.rpc('consume_free_use', { p_uid: user.id, p_limit: FREE_LIMIT });
+          if (!freeErr && allowed !== true) {
+            // Jatah lifetime habis → beri "1x lihat per hari" (waktu Asia/Jakarta)
+            // agar returning user tetap dapat 1 list nama dulu; generate berikutnya
+            // di hari yang sama baru memunculkan paywall.
+            const { data: peek, error: peekErr } = await supabase.rpc('consume_daily_peek', { p_uid: user.id });
+            if (!peekErr && peek !== true) { res.status(200).json({ text: '[]', source: 'bank', limit: 'free' }); return; }
           }
         }
-      } catch (e) { /* token invalid → perlakukan sebagai anonim, lanjut */ }
+      } catch (e) { /* Supabase tersendat → fail-open: biarkan user dapat nama (sama seperti perilaku semula) */ }
+    } else {
+      // Anonim (atau token invalid): tak ada identitas selain IP → batasi per IP.
+      if (!(await allow(req, 'generate_ip'))) {
+        res.status(429).json({ error: 'Terlalu banyak permintaan, coba lagi sebentar ya.' });
+        return;
+      }
     }
   }
 
